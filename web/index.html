@@ -1,0 +1,473 @@
+<title>Construcción y Remodelación — Presupuesto gratis</title>
+
+<!--
+  ══════════════════════════════════════════════════════════════
+  ANTES DE USAR: reemplaza estas 3 cosas (usa Buscar y Reemplazar)
+
+    [TU NOMBRE]     → tu nombre o el de la constructora
+    [TU ZONA]       → ej. Santo Domingo Este, Santiago, Bávaro
+    18090000000     → tu número de WhatsApp con código de país,
+                      sin espacios ni guiones. Ej: 18095551234
+
+  Los campos a reemplazar salen marcados con borde punteado
+  en la página, para que no se te escape ninguno.
+  ══════════════════════════════════════════════════════════════
+-->
+
+<style>
+  :root {
+    --ground:   #EAECED;
+    --surface:  #F7F8F8;
+    --sunken:   #DFE2E4;
+    --ink:      #16191C;
+    --muted:    #5B6167;
+    --faint:    #878E95;
+    --line:     #CBD0D4;
+    --accent:   #E09600;
+    --accent-ink: #1A1204;
+    --good:     #2F7D4F;
+
+    --display: "Arial Narrow", "Helvetica Neue", "Liberation Sans Narrow", system-ui, sans-serif;
+    --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --data: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+
+    --measure: 34rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:  #131619;
+      --surface: #1B1F23;
+      --sunken:  #0D0F11;
+      --ink:     #E9EBEC;
+      --muted:   #9BA2A9;
+      --faint:   #767E86;
+      --line:    #2C3238;
+      --accent:  #FFB62B;
+      --accent-ink: #1A1204;
+      --good:    #55B57E;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:  #131619;
+    --surface: #1B1F23;
+    --sunken:  #0D0F11;
+    --ink:     #E9EBEC;
+    --muted:   #9BA2A9;
+    --faint:   #767E86;
+    --line:    #2C3238;
+    --accent:  #FFB62B;
+    --accent-ink: #1A1204;
+    --good:    #55B57E;
+  }
+
+  :root[data-theme="light"] {
+    --ground:   #EAECED;
+    --surface:  #F7F8F8;
+    --sunken:   #DFE2E4;
+    --ink:      #16191C;
+    --muted:    #5B6167;
+    --faint:    #878E95;
+    --line:     #CBD0D4;
+    --accent:   #E09600;
+    --accent-ink: #1A1204;
+    --good:     #2F7D4F;
+  }
+
+  html { background: var(--ground); }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 5.5rem;
+  }
+
+  .wrap {
+    max-width: var(--measure);
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  /* ── Cinta métrica: marca de regla, motivo de la página ───── */
+  .rule {
+    height: 13px;
+    background-image:
+      repeating-linear-gradient(to right,
+        var(--line) 0 1px, transparent 1px 10px),
+      repeating-linear-gradient(to right,
+        var(--accent) 0 1.5px, transparent 1.5px 50px);
+    background-size: 100% 6px, 100% 11px;
+    background-position: bottom left, bottom left;
+    background-repeat: repeat-x;
+    opacity: .85;
+  }
+
+  /* ── Cabecera ─────────────────────────────────────────────── */
+  header { padding-block: 2.75rem 1.5rem; }
+
+  .eyebrow {
+    font-family: var(--data);
+    font-size: .68rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: 1.1rem;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(2.6rem, 11vw, 4rem);
+    line-height: .94;
+    letter-spacing: -.005em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    margin-bottom: 1rem;
+  }
+  h1 em {
+    font-style: normal;
+    display: block;
+    color: var(--accent);
+  }
+
+  .lede {
+    font-size: 1.08rem;
+    color: var(--muted);
+    max-width: 30rem;
+    text-wrap: pretty;
+  }
+
+  /* ── Secciones ────────────────────────────────────────────── */
+  section { padding-block: 2.5rem; }
+  section + section { border-top: 1px solid var(--line); }
+
+  h2 {
+    font-family: var(--display);
+    text-transform: uppercase;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    margin-bottom: .4rem;
+  }
+
+  .sub {
+    color: var(--faint);
+    font-size: .92rem;
+    margin-bottom: 1.6rem;
+  }
+
+  /* ── Lista de precios: hoja de especificación ─────────────── */
+  .specs {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .spec {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: .25rem 1rem;
+    align-items: baseline;
+    padding-block: .95rem;
+    border-bottom: 1px dotted var(--line);
+  }
+  .spec:first-child { border-top: 1px solid var(--ink); }
+
+  .spec-name {
+    font-weight: 600;
+    letter-spacing: -.005em;
+  }
+
+  .spec-price {
+    font-family: var(--data);
+    font-size: .95rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--ink);
+  }
+  .spec-price b {
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .spec-note {
+    grid-column: 1 / -1;
+    font-size: .87rem;
+    color: var(--muted);
+  }
+
+  /* ── Proceso: tres pasos reales, en orden ─────────────────── */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    counter-reset: paso;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 2.1rem 1fr;
+    gap: .1rem 1rem;
+    align-items: start;
+  }
+  .step::before {
+    counter-increment: paso;
+    content: counter(paso);
+    font-family: var(--data);
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--accent-ink);
+    background: var(--accent);
+    width: 2.1rem;
+    height: 2.1rem;
+    display: grid;
+    place-items: center;
+    grid-row: span 2;
+  }
+  .step h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 2.1rem;
+  }
+  .step p {
+    color: var(--muted);
+    font-size: .95rem;
+  }
+
+  /* ── Garantías ────────────────────────────────────────────── */
+  .promises {
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 1.4rem;
+  }
+  .promise {
+    display: grid;
+    grid-template-columns: 1.3rem 1fr;
+    gap: .75rem;
+    align-items: start;
+    font-size: .96rem;
+  }
+  .promise svg { width: 1.3rem; height: 1.3rem; margin-top: .18rem; color: var(--good); flex: none; }
+  .promise b { font-weight: 650; }
+  .promise span { color: var(--muted); }
+
+  /* ── Zona ─────────────────────────────────────────────────── */
+  .zone {
+    font-family: var(--data);
+    font-size: .9rem;
+    color: var(--muted);
+    padding: 1rem 0 0;
+  }
+
+  /* ── Campos por reemplazar ────────────────────────────────── */
+  .fill {
+    border-bottom: 2px dotted var(--accent);
+    padding-inline: .12em;
+  }
+
+  /* ── Barra fija de WhatsApp ───────────────────────────────── */
+  .bar {
+    position: fixed;
+    inset: auto 0 0 0;
+    background: color-mix(in srgb, var(--ground) 92%, transparent);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+    padding: .75rem 1.25rem calc(.75rem + env(safe-area-inset-bottom));
+    z-index: 10;
+  }
+  .bar-inner {
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+
+  .cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    width: 100%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--display);
+    font-size: 1.22rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: .95rem 1rem;
+    transition: transform .12s ease, filter .12s ease;
+  }
+  .cta svg { width: 1.25rem; height: 1.25rem; }
+  .cta:hover { filter: brightness(1.07); }
+  .cta:active { transform: translateY(1px); }
+  .cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+  .bar-note {
+    text-align: center;
+    font-size: .78rem;
+    color: var(--faint);
+    margin-top: .5rem;
+  }
+
+  footer {
+    padding-block: 2rem 1rem;
+    color: var(--faint);
+    font-size: .82rem;
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div class="rule"></div>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Construcción y remodelación · Rep. Dominicana</p>
+    <h1>
+      Te lo dejo
+      <em>bien hecho</em>
+    </h1>
+    <p class="lede">
+      Filtraciones, pintura, plomería y remodelación.
+      Precio cerrado por escrito antes de empezar — lo que te cotizo
+      es lo que pagas. Sin sorpresas al final.
+    </p>
+  </header>
+
+  <section>
+    <h2>Lo que hago</h2>
+    <p class="sub">Precios de referencia. El exacto te lo doy cuando vea una foto.</p>
+
+    <div class="specs">
+
+      <div class="spec">
+        <span class="spec-name">Sellado de filtraciones y goteras</span>
+        <span class="spec-price">desde <b>RD$4,000</b></span>
+        <span class="spec-note">
+          Reviso el techo sin costo. Sello puntual o impermeabilización completa.
+        </span>
+      </div>
+
+      <div class="spec">
+        <span class="spec-name">Pintura de interiores</span>
+        <span class="spec-price">desde <b>RD$9,000</b></span>
+        <span class="spec-note">
+          Un cuarto, con material y mano de obra. Dos manos y área limpia al entregar.
+        </span>
+      </div>
+
+      <div class="spec">
+        <span class="spec-name">Resane de humedad y grietas</span>
+        <span class="spec-price">desde <b>RD$8,000</b></span>
+        <span class="spec-note">
+          Sellador antihumedad y masilla. Si solo pintas encima, la grieta vuelve.
+        </span>
+      </div>
+
+      <div class="spec">
+        <span class="spec-name">Plomería</span>
+        <span class="spec-price">desde <b>RD$2,500</b></span>
+        <span class="spec-note">
+          Fugas, llaves, mezcladoras, inodoros, cambio de tubería.
+        </span>
+      </div>
+
+      <div class="spec">
+        <span class="spec-name">Cerámica y porcelanato</span>
+        <span class="spec-price">desde <b>RD$500</b>/m²</span>
+        <span class="spec-note">
+          Pisos y paredes. Mano de obra; el material lo eliges tú.
+        </span>
+      </div>
+
+      <div class="spec">
+        <span class="spec-name">Remodelación de baños y cocinas</span>
+        <span class="spec-price">desde <b>RD$50,000</b></span>
+        <span class="spec-note">
+          Proyecto completo con presupuesto detallado por partidas.
+        </span>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>Cómo trabajamos</h2>
+    <p class="sub">Tres pasos. Sin vueltas.</p>
+
+    <div class="steps">
+      <div class="step">
+        <h3>Me mandas una foto</h3>
+        <p>Por WhatsApp, del área y el sector donde estás. No cobro la revisión ni el presupuesto.</p>
+      </div>
+      <div class="step">
+        <h3>Te mando el presupuesto por escrito</h3>
+        <p>El mismo día. Desglosado: qué incluye, qué no incluye, cuántos días y el precio cerrado.</p>
+      </div>
+      <div class="step">
+        <h3>50% al empezar, 50% a la entrega</h3>
+        <p>El anticipo es para comprar el material. El resto lo pagas cuando revises el trabajo terminado y estés conforme.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Mi compromiso</h2>
+
+    <div class="promises">
+      <div class="promise">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>
+        <p><b>Presupuesto gratis y sin compromiso.</b> <span>Te digo el precio aunque después no me contrates.</span></p>
+      </div>
+      <div class="promise">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>
+        <p><b>Precio cerrado.</b> <span>Si aparece algo extra, te lo cotizo aparte y tú decides. Nunca te lo sumo sin avisar.</span></p>
+      </div>
+      <div class="promise">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>
+        <p><b>6 meses de garantía</b> <span>sobre la mano de obra. Si algo falla en ese tiempo, vuelvo y lo corrijo.</span></p>
+      </div>
+      <div class="promise">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>
+        <p><b>Fotos del avance todos los días.</b> <span>Sabes cómo va tu obra sin tener que preguntar.</span></p>
+      </div>
+      <div class="promise">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>
+        <p><b>Te lo entrego limpio.</b> <span>Retiro de escombros incluido. No dejo el reguero para ti.</span></p>
+      </div>
+    </div>
+
+    <p class="zone">
+      Atiendo <span class="fill">[TU ZONA]</span> y alrededores.
+    </p>
+  </section>
+
+  <footer>
+    <span class="fill">[TU NOMBRE]</span> · Construcción y Remodelación
+  </footer>
+
+</div>
+
+<div class="bar">
+  <div class="bar-inner">
+    <a class="cta"
+       href="https://wa.me/18090000000?text=Buenas%2C%20vi%20su%20p%C3%A1gina%20y%20quiero%20un%20presupuesto"
+       target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23a8.2 8.2 0 0 1 8.24 8.24c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.79.97-.14.16-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.47c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07s.89 2.4 1.02 2.56c.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z"/></svg>
+      Pedir presupuesto
+    </a>
+    <p class="bar-note">Gratis y sin compromiso · Te contesto el mismo día</p>
+  </div>
+</div>
