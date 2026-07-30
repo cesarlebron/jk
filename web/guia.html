@@ -1,0 +1,1065 @@
+<title>Guía completa — Captación de clientes para construcción (RD)</title>
+
+<style>
+  :root {
+    --ground:   #EAECED;
+    --surface:  #F7F8F8;
+    --sunken:   #DCE0E2;
+    --ink:      #16191C;
+    --muted:    #5B6167;
+    --faint:    #878E95;
+    --line:     #CBD0D4;
+    --accent:   #E09600;
+    --accent-ink: #1A1204;
+    --good:     #2F7D4F;
+    --bad:      #B3402C;
+
+    --display: "Arial Narrow", "Helvetica Neue", "Liberation Sans Narrow", system-ui, sans-serif;
+    --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --data: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:#131619; --surface:#1B1F23; --sunken:#0C0E10;
+      --ink:#E9EBEC; --muted:#9BA2A9; --faint:#767E86; --line:#2C3238;
+      --accent:#FFB62B; --accent-ink:#1A1204; --good:#55B57E; --bad:#E07A63;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#131619; --surface:#1B1F23; --sunken:#0C0E10;
+    --ink:#E9EBEC; --muted:#9BA2A9; --faint:#767E86; --line:#2C3238;
+    --accent:#FFB62B; --accent-ink:#1A1204; --good:#55B57E; --bad:#E07A63;
+  }
+  :root[data-theme="light"] {
+    --ground:#EAECED; --surface:#F7F8F8; --sunken:#DCE0E2;
+    --ink:#16191C; --muted:#5B6167; --faint:#878E95; --line:#CBD0D4;
+    --accent:#E09600; --accent-ink:#1A1204; --good:#2F7D4F; --bad:#B3402C;
+  }
+
+  html { background: var(--ground); scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; }
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 42rem; margin-inline: auto; padding-inline: 1.15rem; }
+
+  .rule {
+    height: 12px;
+    background-image:
+      repeating-linear-gradient(to right, var(--line) 0 1px, transparent 1px 10px),
+      repeating-linear-gradient(to right, var(--accent) 0 1.5px, transparent 1.5px 50px);
+    background-size: 100% 6px, 100% 10px;
+    background-position: bottom left, bottom left;
+    background-repeat: repeat-x;
+    opacity: .85;
+  }
+
+  /* ── Nav ──────────────────────────────────────────── */
+  nav {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--ground) 93%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .navrow {
+    max-width: 42rem; margin-inline: auto;
+    display: flex; gap: .4rem; overflow-x: auto;
+    padding: .6rem 1.15rem;
+    scrollbar-width: none;
+  }
+  .navrow::-webkit-scrollbar { display: none; }
+  .navrow a {
+    flex: none;
+    font-family: var(--data);
+    font-size: .72rem; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none;
+    padding: .32rem .6rem;
+    border: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  .navrow a:hover { color: var(--ink); border-color: var(--ink); }
+  .navrow a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ── Cabecera ─────────────────────────────────────── */
+  header { padding-block: 2.5rem 1.75rem; }
+  .eyebrow {
+    font-family: var(--data); font-size: .68rem; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 1rem;
+  }
+  h1 {
+    font-family: var(--display); font-weight: 700; text-transform: uppercase;
+    font-size: clamp(2.3rem, 9.5vw, 3.4rem); line-height: .95;
+    text-wrap: balance; margin-bottom: .9rem;
+  }
+  h1 em { font-style: normal; display: block; color: var(--accent); }
+  .lede { font-size: 1.05rem; color: var(--muted); text-wrap: pretty; }
+
+  /* ── Secciones ────────────────────────────────────── */
+  section { padding-block: 2.4rem; border-top: 1px solid var(--line); scroll-margin-top: 3.6rem; }
+
+  h2 {
+    font-family: var(--display); text-transform: uppercase; font-weight: 700;
+    font-size: 1.5rem; letter-spacing: .035em; margin-bottom: .35rem;
+  }
+  .sub { color: var(--faint); font-size: .9rem; margin-bottom: 1.5rem; }
+
+  h3 {
+    font-size: 1.02rem; font-weight: 700; margin-top: 1.9rem; margin-bottom: .5rem;
+    letter-spacing: -.005em;
+  }
+  h3:first-of-type { margin-top: 0; }
+
+  p { margin-bottom: .85rem; }
+  p:last-child { margin-bottom: 0; }
+  strong { font-weight: 660; }
+  em.hl { font-style: normal; color: var(--accent); font-weight: 600; }
+
+  /* ── Tablas ───────────────────────────────────────── */
+  .tablewrap { overflow-x: auto; margin-block: 1rem 1.4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; min-width: 22rem; }
+  th {
+    text-align: left; font-family: var(--data); font-size: .68rem;
+    letter-spacing: .09em; text-transform: uppercase; color: var(--faint);
+    padding: .45rem .6rem .45rem 0; border-bottom: 1px solid var(--ink);
+    white-space: nowrap;
+  }
+  td { padding: .62rem .6rem .62rem 0; border-bottom: 1px dotted var(--line); vertical-align: top; }
+  td:last-child, th:last-child { padding-right: 0; text-align: right; }
+  .num {
+    font-family: var(--data); font-variant-numeric: tabular-nums;
+    white-space: nowrap; font-size: .88rem;
+  }
+  .num b { color: var(--accent); font-weight: 700; }
+
+  /* ── Bloques copiables ────────────────────────────── */
+  .copy { margin-block: 1rem 1.5rem; border: 1px solid var(--line); background: var(--surface); }
+  .copy-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: .5rem .5rem .5rem .8rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--sunken);
+  }
+  .copy-label {
+    font-family: var(--data); font-size: .68rem; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .copy-btn {
+    flex: none; font-family: var(--data); font-size: .68rem; letter-spacing: .07em;
+    text-transform: uppercase; cursor: pointer;
+    background: var(--accent); color: var(--accent-ink);
+    border: 0; padding: .35rem .7rem; font-weight: 700;
+  }
+  .copy-btn:active { transform: translateY(1px); }
+  .copy-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .copy-btn[data-done="1"] { background: var(--good); color: #fff; }
+  .copy pre {
+    margin: 0; padding: .9rem .8rem;
+    font-family: var(--body); font-size: .93rem; line-height: 1.55;
+    white-space: pre-wrap; word-wrap: break-word;
+  }
+  .copy pre.mono { font-family: var(--data); font-size: .78rem; line-height: 1.45; white-space: pre; overflow-x: auto; }
+
+  /* ── Checklist ────────────────────────────────────── */
+  .day { border: 1px solid var(--line); background: var(--surface); margin-bottom: 1.1rem; }
+  .day-head {
+    display: flex; align-items: baseline; gap: .7rem;
+    padding: .8rem .9rem; border-bottom: 1px solid var(--line); background: var(--sunken);
+  }
+  .day-n {
+    font-family: var(--data); font-size: .68rem; font-weight: 700; letter-spacing: .1em;
+    background: var(--accent); color: var(--accent-ink); padding: .2rem .45rem;
+  }
+  .day-t { font-family: var(--display); text-transform: uppercase; font-weight: 700; font-size: 1.05rem; letter-spacing: .03em; }
+  .day-m { margin-left: auto; font-family: var(--data); font-size: .72rem; color: var(--faint); white-space: nowrap; }
+  .day ul { list-style: none; padding: .8rem .9rem; display: flex; flex-direction: column; gap: .6rem; }
+  .day li { display: grid; grid-template-columns: 1.1rem 1fr; gap: .65rem; font-size: .95rem; align-items: start; }
+  .day li::before {
+    content: ""; width: 1.1rem; height: 1.1rem; margin-top: .22rem;
+    border: 1.5px solid var(--faint); flex: none;
+  }
+  .day .goal {
+    padding: .7rem .9rem; border-top: 1px dotted var(--line);
+    font-size: .87rem; color: var(--muted);
+  }
+  .day .goal b { color: var(--ink); }
+
+  /* ── Callouts ─────────────────────────────────────── */
+  .note {
+    border-left: 3px solid var(--accent); background: var(--surface);
+    padding: .9rem 1rem; margin-block: 1.2rem; font-size: .95rem;
+  }
+  .note.warn { border-left-color: var(--bad); }
+
+  ul.plain { list-style: none; display: flex; flex-direction: column; gap: .55rem; margin-block: .9rem 1.3rem; }
+  ul.plain li { display: grid; grid-template-columns: .9rem 1fr; gap: .7rem; font-size: .95rem; align-items: start; }
+  ul.plain li::before { content: "—"; color: var(--accent); font-weight: 700; }
+
+  .dodont { display: grid; gap: 0; margin-block: 1.1rem 1.4rem; }
+  .dodont > div {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    padding: .65rem 0; border-bottom: 1px dotted var(--line); font-size: .9rem;
+  }
+  .dodont > div:first-child {
+    border-bottom: 1px solid var(--ink);
+    font-family: var(--data); font-size: .68rem; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--faint);
+  }
+  .no { color: var(--bad); }
+  .yes { color: var(--good); }
+
+  footer { padding-block: 2.5rem 3rem; color: var(--faint); font-size: .85rem; border-top: 1px solid var(--line); }
+  footer a { color: var(--accent); }
+</style>
+
+<div class="rule"></div>
+
+<nav>
+  <div class="navrow">
+    <a href="#plan">Plan 7 días</a>
+    <a href="#precios">Precios</a>
+    <a href="#anuncios">Anuncios</a>
+    <a href="#guiones">Guiones</a>
+    <a href="#presupuesto">Presupuesto</a>
+    <a href="#canales">Canales</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Construcción y remodelación · República Dominicana</p>
+  <h1>Tu primer trabajo<em>en 7 días</em></h1>
+  <p class="lede">
+    Meta concreta: <strong>RD$12,500</strong> (≈$200 USD). En el mercado dominicano
+    eso es <em class="hl">un cuarto pintado</em> o <em class="hl">una filtración sellada</em>.
+    Todo lo que sigue existe para que consigas ese primer cliente.
+  </p>
+</header>
+
+<section id="que-es">
+  <h2>Qué es esto</h2>
+  <p class="sub">Y qué no es.</p>
+
+  <p>
+    Pediste 10 planes de ingresos automáticos donde una IA hiciera todo y te transfiriera
+    dinero. Eso no existe — no puedo abrir cuentas, cobrar, ni mover fondos, y prometértelo
+    habría sido mentirte.
+  </p>
+  <p>
+    Lo que sí existe es que <strong>ya tienes un oficio que factura RD$12,500 por trabajo.</strong>
+    Tu problema nunca fue el precio ni la habilidad. Es que nadie sabe que existes.
+    Todo este paquete ataca solo ese problema.
+  </p>
+
+  <h3>Lo que hice yo</h3>
+  <ul class="plain">
+    <li>Investigué precios reales del mercado dominicano 2026 y armé tu lista de tarifas</li>
+    <li>Escribí todos los anuncios, mensajes y estados de WhatsApp, listos para copiar</li>
+    <li>Escribí los guiones de venta para las 10 situaciones que te van a pasar</li>
+    <li>Armé la plantilla de presupuesto formal con un ejemplo lleno</li>
+    <li>Mapeé dónde están los clientes en RD, ordenado por rapidez de resultado</li>
+    <li>Diseñé tu página web para mandar por WhatsApp</li>
+    <li>Ordené todo en un plan de 7 días, hora por hora</li>
+  </ul>
+
+  <h3>Lo que tienes que hacer tú</h3>
+  <p>Son cuatro cosas y no puedo hacer ninguna por ti:</p>
+  <ul class="plain">
+    <li><strong>Mandar los mensajes.</strong> Yo los escribí, tú les das enviar</li>
+    <li><strong>Contestar cuando te escriban.</strong> Con el guion exacto que está aquí abajo</li>
+    <li><strong>Ir a hacer el trabajo.</strong> Esa es tu parte, es tu oficio</li>
+    <li><strong>Cobrar.</strong> El dinero va directo de tu cliente a ti. Yo nunca lo toco</li>
+  </ul>
+
+  <div class="note">
+    <strong>Dos horas diarias durante una semana.</strong> Eso es lo que cuesta.
+    La primera semana es la más dura y la que menos paga. La cuarta es cuando
+    las ferreterías, los porteros y los referidos empiezan a mandarte trabajo solos.
+  </div>
+</section>
+
+<section id="plan">
+  <h2>El plan de 7 días</h2>
+  <p class="sub">Haz solo lo del día que te toca. No te adelantes.</p>
+
+  <div class="day">
+    <div class="day-head"><span class="day-n">DÍA 1</span><span class="day-t">Que 20 personas sepan que existes</span><span class="day-m">2 h · RD$0</span></div>
+    <ul>
+      <li>Lee la sección de precios y elige <strong>un</strong> servicio para liderar. Si dudas, escoge filtraciones.</li>
+      <li>Reemplaza <strong>[TU NOMBRE]</strong>, <strong>[TU TELÉFONO]</strong> y <strong>[TU ZONA]</strong> en todos los textos.</li>
+      <li>Publica el estado de WhatsApp del día 1.</li>
+      <li>Manda el mensaje directo a <strong>20 contactos, uno por uno.</strong> Nada de lista de difusión.</li>
+      <li>Arregla tu WhatsApp: foto tuya trabajando, nombre «[TU NOMBRE] – Remodelación», info con tu zona.</li>
+    </ul>
+    <p class="goal"><b>Meta:</b> 20 personas contactadas. Esperado: 2–4 responden. Puede que ninguna hoy — es normal.</p>
+  </div>
+
+  <div class="day">
+    <div class="day-head"><span class="day-n">DÍA 2</span><span class="day-t">El día de las ferreterías</span><span class="day-m">3 h · RD$0</span></div>
+    <ul>
+      <li>Publica el estado del día 2 (el de las lluvias).</li>
+      <li>Manda el mensaje a <strong>20 contactos más</strong>, distintos a los de ayer.</li>
+      <li>Visita <strong>5 ferreterías</strong> y propón el acuerdo de comisión. Anota el nombre del dueño.</li>
+      <li>Contesta con los guiones a quien te haya escrito. <strong>Pide foto siempre.</strong></li>
+    </ul>
+    <p class="goal"><b>Meta:</b> 40 contactados + 5 ferreterías con tu número. Esas ferreterías te van a mandar clientes durante meses. <b>No te saltes este día.</b></p>
+  </div>
+
+  <div class="day">
+    <div class="day-head"><span class="day-n">DÍA 3</span><span class="day-t">Internet</span><span class="day-m">2 h · RD$0</span></div>
+    <ul>
+      <li>Publica el estado del día 3 (pintura desde RD$9,000).</li>
+      <li>Publica los <strong>3 anuncios en Marketplace</strong>, por separado, no todo junto.</li>
+      <li>Publica los mismos 3 en <strong>Corotos</strong>, en Servicios → Construcción.</li>
+      <li>Únete a <strong>10 grupos de Facebook</strong> de tu zona.</li>
+      <li>Publica en 3 de esos grupos con la <strong>versión del consejo</strong> — la que no parece anuncio.</li>
+    </ul>
+    <p class="goal"><b>Meta:</b> 3 anuncios vivos en 2 plataformas + presencia en 3 grupos.</p>
+  </div>
+
+  <div class="day">
+    <div class="day-head"><span class="day-n">DÍA 4</span><span class="day-t">Cerrar</span><span class="day-m">2 h</span></div>
+    <ul>
+      <li>20 contactos más. Ya van 60.</li>
+      <li>A todo el que pidió precio: <strong>manda el presupuesto formal</strong>, no un número suelto.</li>
+      <li>Publica en 3 grupos nuevos.</li>
+      <li>Al que se quedó callado hace 48 h: manda el seguimiento. Uno solo.</li>
+    </ul>
+    <p class="goal"><b>Meta:</b> al menos 1 presupuesto formal enviado. Aquí es donde normalmente cae el primer sí.</p>
+  </div>
+
+  <div class="day">
+    <div class="day-head"><span class="day-n">DÍA 5</span><span class="day-t">Ampliar</span><span class="day-m">3 h · ~RD$500</span></div>
+    <ul>
+      <li>Manda a imprimir <strong>100 volantes</strong> (~RD$500).</li>
+      <li>Visita <strong>5 edificios</strong> de 10+ años. Habla con el portero, ofrécele RD$1,000 por referido.</li>
+      <li>Reparte volantes en un residencial de casas viejas.</li>
+      <li>Renueva los anuncios de Marketplace y Corotos.</li>
+    </ul>
+    <p class="goal"><b>Meta:</b> 5 porteros con tu número + 100 volantes en la calle.</p>
+  </div>
+
+  <div class="day">
+    <div class="day-head"><span class="day-n">DÍA 6</span><span class="day-t">Ejecutar o insistir</span><span class="day-m">variable</span></div>
+    <ul>
+      <li><strong>Si cerraste:</strong> cobra el 50% <em>antes</em> de comprar material. Foto del ANTES desde un ángulo fijo. Foto de avance al mediodía.</li>
+      <li><strong>Si no:</strong> 20 contactos más, 5 ferreterías de otra zona, 3 grupos nuevos.</li>
+      <li>Revisa: ¿contestas en menos de 30 min? ¿pides foto? ¿mandas el presupuesto formal?</li>
+    </ul>
+    <p class="goal">No cerrar en 6 días no es fracaso — es que el embudo no ha llenado. Con 80 contactados y 10 ferreterías, la llamada llega.</p>
+  </div>
+
+  <div class="day">
+    <div class="day-head"><span class="day-n">DÍA 7</span><span class="day-t">Cobrar y multiplicar</span><span class="day-m">2 h</span></div>
+    <ul>
+      <li><strong>Cobra el saldo estando en el sitio.</strong> Revisa con el cliente, corrige, cobra.</li>
+      <li>Foto del DESPUÉS, mismo ángulo exacto que la del antes.</li>
+      <li>Publica el antes/después en tu estado y en los grupos.</li>
+      <li>Manda el mensaje de <strong>referidos</strong>. Es el más rentable de todo el paquete.</li>
+      <li>Avisa a las ferreterías que cerraste. Los mantiene activos.</li>
+    </ul>
+    <p class="goal"><b>Meta:</b> dinero cobrado + fotos de prueba + 1 referido pedido.</p>
+  </div>
+
+  <h3>Cómo se ve el éxito al día 7</h3>
+  <div class="tablewrap">
+    <table>
+      <tr><td>Personas contactadas</td><td class="num">80–100</td></tr>
+      <tr><td>Ferreterías aliadas</td><td class="num">5–10</td></tr>
+      <tr><td>Porteros con tu número</td><td class="num">5</td></tr>
+      <tr><td>Anuncios activos</td><td class="num">6</td></tr>
+      <tr><td>Presupuestos enviados</td><td class="num">2–5</td></tr>
+      <tr><td><strong>Trabajos cerrados</strong></td><td class="num"><b>1–2</b></td></tr>
+      <tr><td><strong>Facturado</strong></td><td class="num"><b>RD$12,000–35,000</b></td></tr>
+    </table>
+  </div>
+</section>
+
+<section id="precios">
+  <h2>Tu oferta y tus precios</h2>
+  <p class="sub">Referencias del mercado dominicano 2026. Meta: RD$12,500 ≈ $200 USD.</p>
+
+  <div class="note">
+    <strong>No vendas «construcción».</strong> Nadie busca eso. La gente busca un problema
+    resuelto: <em>«se me está filtrando el techo»</em>, <em>«el baño está feo»</em>,
+    <em>«necesito pintar antes de que llegue mi mamá»</em>. Tu oferta se organiza
+    por problema, no por oficio.
+  </div>
+
+  <h3>Los 5 servicios gancho</h3>
+  <div class="tablewrap">
+    <table>
+      <tr><th>Servicio</th><th>Precio</th></tr>
+      <tr><td><strong>Sellado de filtraciones</strong><br><span style="color:var(--muted);font-size:.88rem">El mejor gancho en RD: es urgente y no hay que convencer a nadie</span></td><td class="num">RD$450–700/m²<br><b>Techo 30 m²: RD$15–21 mil</b></td></tr>
+      <tr><td><strong>Pintura de interiores</strong><br><span style="color:var(--muted);font-size:.88rem">Cobra +20–40% si hay grietas o humedad</span></td><td class="num">RD$60–120/m²<br><b>Un cuarto: RD$9–16 mil</b></td></tr>
+      <tr><td><strong>Resane de humedad y grietas</strong><br><span style="color:var(--muted);font-size:.88rem">Siempre ofrece el combo con pintura</span></td><td class="num">RD$400–600/m²<br><b>20 m²: RD$8–12 mil</b></td></tr>
+      <tr><td><strong>Plomería</strong><br><span style="color:var(--muted);font-size:.88rem">Entras por una llave, sales con el baño completo</span></td><td class="num">Visita RD$1,500–2,500<br><b>Tubería baño: RD$12–25 mil</b></td></tr>
+      <tr><td><strong>Cerámica y porcelanato</strong></td><td class="num">RD$500–800/m²<br><b>Baño: RD$18–35 mil</b></td></tr>
+    </table>
+  </div>
+
+  <h3>Los trabajos grandes</h3>
+  <div class="tablewrap">
+    <table>
+      <tr><th>Trabajo</th><th>RD$</th></tr>
+      <tr><td>Remodelación de baño — básica</td><td class="num">50,000–120,000</td></tr>
+      <tr><td>Remodelación de baño — gama media</td><td class="num">120,000–250,000</td></tr>
+      <tr><td>Remodelación de cocina — básica</td><td class="num">80,000–200,000</td></tr>
+      <tr><td>Pintura casa completa + resanes</td><td class="num">45,000–90,000</td></tr>
+      <tr><td>Impermeabilización techo completo</td><td class="num">40,000–80,000</td></tr>
+    </table>
+  </div>
+
+  <h3>La fórmula para no perder plata</h3>
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Ejemplo — pintar un cuarto de 15 m²</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre class="mono">Material (galones, brochas, cinta, lija)   RD$ 3,500
+Material + 15% de margen                  RD$ 4,025
+Tu mano de obra (1.5 días)                RD$ 6,000
+Subtotal                                  RD$10,025
++ 15% imprevistos                         RD$ 1,504
+──────────────────────────────────────────────────
+PRECIO AL CLIENTE                         RD$11,500
+                            → redondeas a RD$12,000
+
+Ganas ~RD$6,500 limpios.</pre>
+  </div>
+
+  <h3>Las 3 reglas de cobro que no puedes romper</h3>
+  <ul class="plain">
+    <li><strong>50% de anticipo SIEMPRE.</strong> Sin excepción, ni con familia. El anticipo compra el material</li>
+    <li><strong>El resto al terminar</strong>, antes de recoger las herramientas. No «te paso el lunes»</li>
+    <li><strong>Nada de trabajos «a ver cómo sale».</strong> Precio cerrado por escrito o no hay trabajo</li>
+  </ul>
+
+  <h3>Ajusta por zona</h3>
+  <ul class="plain">
+    <li><strong>Punta Cana / Bávaro / zona turística:</strong> sube 15–25%</li>
+    <li><strong>Interior y pueblos:</strong> baja 10–20%</li>
+    <li><strong>Siempre:</strong> revisa tu costo real de material antes de cerrar un precio</li>
+  </ul>
+</section>
+
+<section id="anuncios">
+  <h2>Anuncios listos</h2>
+  <p class="sub">Copia, reemplaza los corchetes, publica. No los adornes — están escritos así a propósito.</p>
+
+  <h3>Estados de WhatsApp</h3>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Estado · Día 1</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>🔧 Aviso a mi gente:
+
+Estoy tomando trabajos de construcción y remodelación en [TU ZONA].
+
+• Filtraciones y goteras en techo
+• Pintura de interiores
+• Resane de humedad y grietas
+• Plomería
+• Cerámica y porcelanato
+
+Presupuesto GRATIS. Me mandas una foto por aquí y te digo cuánto es.
+
+Si conoces a alguien que lo necesite, pásale mi número. 🙏</pre>
+  </div>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Estado · Día 2 — el de las lluvias</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>☔ Con la lluvia que ha caído, el 80% de las llamadas que recibo
+son por filtraciones en el techo.
+
+Un dato: sellarla ahora te cuesta RD$5,000.
+Esperar a que se pudra la loza te cuesta RD$60,000.
+
+Te reviso el techo sin compromiso. [TU TELÉFONO]</pre>
+  </div>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Estado · Día 3</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Pintar un cuarto: desde RD$9,000, todo incluido.
+Dos días y te lo entrego limpio.
+
+¿Tienes un cuarto que lleva años igual? Escríbeme. [TU TELÉFONO]</pre>
+  </div>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Estado · Día 7 — después del primer trabajo</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Terminado hoy en [ZONA DEL TRABAJO]. ✅
+
+[FOTO ANTES] → [FOTO DESPUÉS]
+
+Gracias [NOMBRE DEL CLIENTE] por la confianza.
+
+¿Quién sigue? [TU TELÉFONO]</pre>
+  </div>
+
+  <div class="note">
+    <strong>Foto de ANTES y DESPUÉS de cada trabajo, desde el mismo ángulo, siempre.</strong>
+    Es el activo más valioso que vas a construir esta semana. Vale más que cualquier anuncio pagado.
+  </div>
+
+  <h3>Mensaje directo a tus contactos</h3>
+  <p style="color:var(--muted);font-size:.92rem">Uno por uno, 20 al día. Lleva 15 minutos. Nada de difusión masiva — la gente lo huele.</p>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Para conocidos y familia</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Saludos [NOMBRE], ¿cómo va todo?
+
+Te escribo porque estoy tomando trabajos de remodelación y arreglos
+por mi cuenta en [TU ZONA] — pintura, filtraciones, plomería, cerámica.
+
+No te estoy vendiendo nada. Es más bien por si sabes de alguien
+que necesite algo así, que le pases mi número.
+
+Y si tú tienes algún pendiente en la casa, mándame una foto
+y te digo qué cuesta, sin compromiso.</pre>
+  </div>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Para quien ya te conoce trabajando</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>[NOMBRE], saludos. Le escribe [TU NOMBRE], el que le hizo
+[EL TRABAJO QUE LE HICISTE].
+
+Estoy con agenda abierta esta semana y quería avisarle
+por si tiene algún pendiente en la casa.
+
+Si conoce a alguien que necesite un trabajo de remodelación,
+le agradezco que le pase mi número. Me ayuda mucho.</pre>
+  </div>
+
+  <h3>Facebook Marketplace y Corotos</h3>
+  <p style="color:var(--muted);font-size:.92rem">
+    Publica cada servicio <strong>por separado</strong>. Renueva cada 2 días o el anuncio se hunde.
+    Foto de trabajo real, nunca imagen de internet — la gente distingue.
+  </p>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Anuncio 1 · Filtraciones — precio RD$4,000</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Sellado de filtraciones y goteras en techo - Presupuesto gratis
+
+¿Se te está filtrando el techo?
+
+Sello filtraciones, goteras y grietas. Trabajo garantizado.
+
+✅ Inspección y presupuesto GRATIS
+✅ Sellado puntual desde RD$4,000
+✅ Impermeabilización completa de techo
+✅ Material de primera, no parcho por parchar
+
+Atiendo [TU ZONA] y alrededores.
+
+Mándame una foto del área por WhatsApp y te digo
+el precio el mismo día.
+
+📱 [TU TELÉFONO]</pre>
+  </div>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Anuncio 2 · Pintura — precio RD$9,000</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Pintura de interiores - Cuarto desde RD$9,000 todo incluido
+
+Pinto tu casa o apartamento. Precio cerrado, sin sorpresas.
+
+✅ Un cuarto desde RD$9,000 (material y mano de obra incluidos)
+✅ Sala-comedor desde RD$18,000
+✅ Apartamento completo desde RD$35,000
+✅ Resano grietas y humedad antes de pintar
+✅ Entrego el área limpia
+
+Presupuesto GRATIS. Me mandas las medidas o una foto
+y te doy el precio hoy mismo.
+
+Atiendo [TU ZONA].
+
+📱 [TU TELÉFONO]</pre>
+  </div>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Anuncio 3 · Remodelación — precio RD$50,000</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Remodelación de baños y cocinas - Presupuesto sin compromiso
+
+Remodelo baños y cocinas completos.
+
+✅ Baño completo desde RD$50,000
+✅ Cocina desde RD$80,000
+✅ Plomería, cerámica, porcelanato, pintura
+✅ Presupuesto detallado por escrito antes de empezar
+✅ Precio cerrado — lo que cotizo es lo que cobras
+
+Trabajo con anticipo del 50% y el resto a la entrega.
+
+Mándame fotos del espacio por WhatsApp y te preparo
+el presupuesto completo.
+
+📱 [TU TELÉFONO]</pre>
+  </div>
+
+  <h3>Grupos de Facebook</h3>
+  <p style="color:var(--muted);font-size:.92rem">
+    Busca «[TU ZONA] compra y venta», «Vecinos de [RESIDENCIAL]», «Clasificados [PROVINCIA]».
+    Únete a 10, publica en 3 por día, distinto texto en cada uno.
+  </p>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">La que mejor funciona — útil, no vendedora</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Buenas, vecinos. Soy [TU NOMBRE], trabajo en construcción
+y remodelación aquí en [TU ZONA].
+
+Un consejo por si le sirve a alguien: con estas lluvias,
+si ves una mancha marrón en el techo, no esperes a que gotee.
+Cuando gotea ya el agua lleva tiempo adentro de la loza
+y la reparación se multiplica por 10.
+
+Si alguien quiere que le eche un ojo al techo sin compromiso,
+me escribe. No cobro la revisión.
+
+[TU TELÉFONO]</pre>
+  </div>
+
+  <h3>Volante para imprimir</h3>
+  <p style="color:var(--muted);font-size:.92rem">
+    100 volantes ≈ RD$500. Se reparten en 2 horas. Mejor retorno para trabajo local en RD.
+    Ve a residenciales de <strong>casas de 10+ años</strong> — ahí están las filtraciones.
+  </p>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Texto del volante</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>¿SE TE ESTÁ FILTRANDO EL TECHO?
+¿TIENES ESE ARREGLO PENDIENTE?
+
+[TU NOMBRE] — Construcción y Remodelación
+
+✓ Filtraciones y goteras
+✓ Pintura de interiores
+✓ Resane de humedad y grietas
+✓ Plomería
+✓ Cerámica y porcelanato
+✓ Remodelación de baños y cocinas
+
+► PRESUPUESTO GRATIS ◄
+Precio cerrado por escrito. Sin sorpresas al final.
+
+📱 [TU TELÉFONO]
+Atiendo [TU ZONA] y alrededores</pre>
+  </div>
+</section>
+
+<section id="guiones">
+  <h2>Guiones de WhatsApp</h2>
+  <p class="sub">Todo lo que te van a decir y exactamente qué contestar.</p>
+
+  <div class="note warn">
+    <strong>La regla que más dinero te va a hacer ganar:</strong> nunca des un precio
+    sin haber visto una foto. Ahí es donde el 90% de los contratistas pierde plata —
+    dicen «eso son como RD$8,000», llegan, el trabajo era el doble, y ya no pueden
+    subir sin quedar mal.
+  </div>
+
+  <h3>1 · Te escriben por primera vez</h3>
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Respuesta</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Buenas [NOMBRE], claro que sí. ¿En qué le puedo ayudar?
+
+Para darle un precio exacto necesito dos cositas:
+
+1. Una foto o video del área
+2. En qué sector está
+
+Con eso le mando el presupuesto hoy mismo, sin compromiso.</pre>
+  </div>
+
+  <h3>2 · «¿Cuánto me cobras?» sin foto</h3>
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Respuesta — da rango, no número cerrado</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Le doy el precio exacto apenas vea el área, [NOMBRE],
+para no darle un número y después cambiárselo — eso no lo hago.
+
+Para que tenga una idea mientras tanto:
+un cuarto de tamaño normal me sale entre RD$9,000 y RD$16,000,
+con material y mano de obra incluidos.
+
+La diferencia depende de si hay que resanar grietas o humedad primero.
+
+Mándeme una foto y en un rato le confirmo el número cerrado.</pre>
+  </div>
+
+  <h3>3 · Ya viste la foto — das el precio</h3>
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Los 4 elementos: qué incluye, tiempo, precio cerrado, pregunta final</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Listo [NOMBRE], ya vi la foto. Le explico:
+
+TRABAJO: Pintura de cuarto de 15 m², dos manos
+         + resane de las grietas que se ven en la esquina
+
+INCLUYE: Material (pintura, sellador, lija, cinta),
+         mano de obra, protección de muebles y limpieza al final
+
+TIEMPO:  2 días
+
+PRECIO:  RD$14,000
+
+Forma de pago: RD$7,000 al empezar (para comprar el material)
+y RD$7,000 al entregarle el trabajo terminado.
+
+¿Le sirve? Tengo disponible [DÍA] si quiere que se lo agende.</pre>
+  </div>
+
+  <h3>4 · «Está caro»</h3>
+  <p style="color:var(--muted);font-size:.92rem">No bajes el precio. Justifica primero; si de verdad no tiene el dinero, quita alcance.</p>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Opción A — justificar</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Le entiendo, [NOMBRE]. Le desgloso para que vea en qué se va:
+
+Material: RD$5,500 (galón de pintura de marca, sellador, lija, cinta)
+Mano de obra: 2 días de trabajo
+
+Le soy sincero: hay quien le va a cobrar RD$8,000.
+Le da una mano de pintura sobre la grieta, se ve bien una semana,
+y en tres meses la grieta vuelve a salir y tiene que pagar otra vez.
+
+Yo le resano primero y le doy dos manos. Por eso le doy garantía.</pre>
+  </div>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Opción B — quitar alcance</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Se lo puedo dejar en RD$11,000, pero le digo qué cambia:
+sería sin el resane de las grietas, solo pintura.
+
+Le va a quedar bien ahorita, nada más que en unos meses
+las grietas van a marcarse otra vez.
+
+Usted me dice cuál prefiere y así lo hacemos.</pre>
+  </div>
+
+  <h3>5 · «Lo voy a pensar» o se queda callado</h3>
+  <p style="color:var(--muted);font-size:.92rem">Espera 48 horas. Manda esto una sola vez. Si no contesta, lo dejas ir.</p>
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Seguimiento</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>[NOMBRE], buenas. ¿Pudo pensar lo del [TRABAJO]?
+
+Le comento por si le sirve: tengo [DÍA] disponible.
+Después de esa semana ya se me complica hasta [FECHA].
+
+Si quiere lo agendamos, y si no es el momento no hay ningún problema
+— me avisa cuando esté listo y con gusto se lo hago.</pre>
+  </div>
+
+  <h3>6 · Pedir el anticipo</h3>
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">El anticipo tiene una razón concreta: comprar material</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Perfecto [NOMBRE], quedamos para el [DÍA] a las [HORA].
+
+Para agendarle el día y comprar el material, el anticipo
+es de RD$[50%]. Me lo puede pasar por transferencia
+o efectivo, como le quede mejor.
+
+Cuenta: [TU BANCO] – [TU CUENTA] – a nombre de [TU NOMBRE]
+
+Apenas lo reciba le confirmo y compro el material mañana temprano.</pre>
+  </div>
+
+  <h3>7 · Durante el trabajo — foto al mediodía, todos los días</h3>
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Avance diario</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>[NOMBRE], buenas. Le mando cómo va:
+
+[FOTO]
+
+Ya terminé el resane y la primera mano.
+Mañana le doy la segunda y le entrego limpio.</pre>
+  </div>
+
+  <h3>8 · Cobrar el saldo, antes de irte</h3>
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Cierre</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>[NOMBRE], ya está terminado. Le dejé el área limpia.
+
+¿Quiere darle una revisada conmigo antes de que recoja?
+Si hay algún detalle se lo corrijo ahora mismo.
+
+El saldo son RD$[50%].</pre>
+  </div>
+  <div class="note warn">
+    <strong>No te vayas sin cobrar. Ni una vez.</strong> «Te lo paso el lunes» es como
+    se pierde el 30% de la facturación en este oficio.
+  </div>
+
+  <h3>9 · Pedir referidos — el mensaje más rentable de todos</h3>
+  <p style="color:var(--muted);font-size:.92rem">Mándalo <strong>al día siguiente</strong> de terminar. Ni antes ni una semana después.</p>
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Referidos</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>[NOMBRE], buenas. Espero que le haya quedado bien el trabajo.
+
+Le pido un favor: si quedó conforme, ¿podría pasarle mi número
+a alguien que le pueda hacer falta? Un vecino, un familiar.
+
+Así es como consigo la mayoría de mis trabajos y me ayuda muchísimo. 🙏
+
+Y si algún día necesita otra cosa, aquí estoy.</pre>
+  </div>
+
+  <h3>10 · Pedir la foto y el testimonio</h3>
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Testimonio</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>[NOMBRE], una última cosita y no le molesto más.
+
+¿Le puedo tomar una foto al trabajo terminado para mostrarlo?
+No sale nada suyo ni de la casa por fuera, solo el área.
+
+Y si me quiere mandar dos líneas de cómo le pareció el trabajo,
+me sirve muchísimo para que la gente confíe.</pre>
+  </div>
+
+  <h3>Nunca / Siempre</h3>
+  <div class="dodont">
+    <div><span>Nunca</span><span>Siempre</span></div>
+    <div><span class="no">Dar precio sin ver foto</span><span class="yes">Pedir foto, sin excepción</span></div>
+    <div><span class="no">Mensaje sin pregunta final</span><span class="yes">Cerrar con una pregunta</span></div>
+    <div><span class="no">Bajar precio si dicen «caro»</span><span class="yes">Quitar alcance o justificar</span></div>
+    <div><span class="no">Párrafos largos</span><span class="yes">Líneas cortas, con espacios</span></div>
+    <div><span class="no">Empezar sin anticipo</span><span class="yes">50% antes del material</span></div>
+    <div><span class="no">Contestar en 6 horas</span><span class="yes">Contestar en menos de 30 min</span></div>
+    <div><span class="no">Irte sin cobrar</span><span class="yes">Revisar con él y cobrar ahí</span></div>
+  </div>
+
+  <div class="note">
+    <strong>El dato que más importa:</strong> en este oficio, quien contesta primero
+    se gana el trabajo. No el más barato ni el mejor — <em>el que contesta primero</em>.
+    Ten las notificaciones encendidas.
+  </div>
+</section>
+
+<section id="presupuesto">
+  <h2>Plantilla de presupuesto</h2>
+  <p class="sub">Un contratista que manda esto cobra 30–40% más que uno que manda «eso te sale en 15 mil». Es el mismo trabajo — es la presentación.</p>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Plantilla — llénala y mándala como PDF o captura</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre class="mono">═══════════════════════════════════════════════
+   [TU NOMBRE / CONSTRUCTORA]
+   Construcción y Remodelación
+   Tel: [TU TELÉFONO]
+═══════════════════════════════════════════════
+
+PRESUPUESTO N° 001
+Fecha: [FECHA]
+Válido por: 15 días
+
+CLIENTE:   [NOMBRE]
+DIRECCIÓN: [SECTOR]
+
+───────────────────────────────────────────────
+DESCRIPCIÓN DEL TRABAJO
+───────────────────────────────────────────────
+
+1. [PARTIDA 1]
+   [Detalle de qué se hace]
+   Cantidad: [X] m²           RD$ [MONTO]
+
+2. [PARTIDA 2]
+   [Detalle de qué se hace]
+   Cantidad: [X] m²           RD$ [MONTO]
+
+───────────────────────────────────────────────
+                        SUBTOTAL  RD$ [MONTO]
+              Imprevistos (15%)   RD$ [MONTO]
+───────────────────────────────────────────────
+                           TOTAL  RD$ [MONTO]
+═══════════════════════════════════════════════
+
+INCLUYE:
+✓ Todos los materiales especificados
+✓ Mano de obra completa
+✓ Protección de muebles y pisos
+✓ Limpieza del área al finalizar
+✓ Retiro de escombros
+
+NO INCLUYE:
+✗ Trabajos no descritos arriba
+✗ Reparaciones estructurales que aparezcan al abrir
+✗ Cambio de tuberías o cableado no contemplado
+   (se cotiza aparte si se detecta)
+
+TIEMPO DE EJECUCIÓN: [X] días laborables
+
+FORMA DE PAGO:
+• 50% al inicio (RD$ [MONTO]) — compra de material
+• 50% a la entrega (RD$ [MONTO])
+
+GARANTÍA:
+6 meses sobre la mano de obra ejecutada.
+
+───────────────────────────────────────────────
+Cualquier trabajo adicional solicitado durante
+la obra se cotizará por separado y requerirá
+su aprobación por escrito antes de ejecutarse.
+───────────────────────────────────────────────
+
+Cuenta para el anticipo:
+[BANCO] — [N° DE CUENTA] — [TU NOMBRE]
+═══════════════════════════════════════════════</pre>
+  </div>
+
+  <h3>Los 5 detalles que hacen que te digan que sí</h3>
+  <ul class="plain">
+    <li><strong>El número de presupuesto.</strong> Aunque sea el primero, ponle 001. Dice «yo hago esto todos los días»</li>
+    <li><strong>La sección NO INCLUYE.</strong> Parece que resta, pero demuestra que sabes qué puede salir mal — y te salva cuando aparece una tubería podrida</li>
+    <li><strong>La línea de imprevistos.</strong> Nadie la discute y te cubre el margen</li>
+    <li><strong>La garantía.</strong> Es lo que te separa del que cobra RD$8,000</li>
+    <li><strong>«Válido por 15 días».</strong> Urgencia sin presionar</li>
+  </ul>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Mensaje para acompañar el presupuesto</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>[NOMBRE], le adjunto el presupuesto formal.
+
+Ahí le desgloso cada partida, qué incluye y qué no,
+para que no haya sorpresas de ningún tipo.
+
+Cualquier duda me dice y se la aclaro.
+¿Se lo agendo para [DÍA]?</pre>
+  </div>
+</section>
+
+<section id="canales">
+  <h2>Dónde están los clientes</h2>
+  <p class="sub">Ordenado por rapidez de resultado, no por tamaño.</p>
+
+  <h3>Hoy mismo, gratis</h3>
+
+  <p><strong>1 · Tu propia agenda de WhatsApp.</strong> Tienes entre 200 y 800 contactos y no los estás usando.
+  La gente contrata a quien conoce o a quien le recomendaron, no a un desconocido de internet.
+  De 60 mensajes en 3 días esperas 3–6 conversaciones y 1–2 trabajos. <em class="hl">Con uno solo pasaste los $200.</em></p>
+
+  <p><strong>2 · Ferreterías del barrio.</strong> Esto es lo que casi ningún contratista hace y es una mina.
+  El ferretero escucha «¿usted sabe de alguien que me lo instale?» diez veces al día.</p>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Qué decirle al dueño de la ferretería</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Buenas. Soy [NOMBRE], trabajo en remodelación aquí en la zona.
+
+Le vengo a proponer algo: cuando venga un cliente buscando material
+pero no tenga quién se lo instale, páseme el número.
+
+Yo le compro el material aquí siempre y le doy RD$500 por cada
+cliente que me mande y se cierre. ¿Le parece?</pre>
+  </div>
+  <p style="color:var(--muted);font-size:.92rem">Con 5 ferreterías son 5–15 trabajos al mes que no te costaron un peso de publicidad.</p>
+
+  <p><strong>3 · Porteros y administradores de edificios.</strong> El portero sabe todo lo que pasa
+  en ese edificio — quién tiene una gotera, quién se mudó, quién está remodelando. Y casi nadie le pregunta.</p>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Qué decirle al portero</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Buenas, ¿usted sabe si aquí hay algún apartamento con filtración
+o que necesite algún arreglo? Trabajo en eso.
+
+Si me consigue el trabajo le doy RD$1,000.</pre>
+  </div>
+
+  <h3>Esta semana</h3>
+  <ul class="plain">
+    <li><strong>Facebook Marketplace y grupos de barrio</strong> — donde más se busca este servicio en RD</li>
+    <li><strong>Corotos</strong> — el clasificado más usado del país, categoría Servicios → Construcción</li>
+    <li><strong>Volantes</strong> — RD$500 por 100. Residenciales con casas de 10+ años</li>
+  </ul>
+
+  <h3>Ticket alto, toma más tiempo</h3>
+
+  <p><strong>Airbnb y alquileres turísticos.</strong> Bávaro, Punta Cana, Las Terrenas, Cabarete, Juan Dolio.
+  Un anfitrión no puede tener el apartamento parado: paga rápido, paga bien y <strong>te llama todos los meses</strong>.
+  Además allá los precios son 15–25% más altos.</p>
+
+  <div class="copy">
+    <div class="copy-head"><span class="copy-label">Mensaje a anfitriones de Airbnb</span><button class="copy-btn" type="button">Copiar</button></div>
+    <pre>Buenas, trabajo en mantenimiento y remodelación.
+
+Le propongo ser su contacto fijo para arreglos rápidos entre
+huéspedes — filtraciones, pintura, plomería.
+
+Atiendo en menos de 24 horas porque sé que cada día parado
+le cuesta dinero.</pre>
+  </div>
+
+  <p><strong>Inmobiliarias y corredores.</strong> Un corredor no puede vender un apartamento
+  con una mancha de humedad en el techo. Tu arreglo le hace ganar más comisión a él también.</p>
+
+  <p><strong>Constructoras pequeñas.</strong> Siempre buscan cuadrillas para partidas sueltas
+  cuando les aprieta el cronograma. Menos margen, pero volumen y continuidad para las semanas flojas.</p>
+
+  <h3>Los 3 que no valen la pena ahora</h3>
+  <div class="tablewrap">
+    <table>
+      <tr><th>Canal</th><th>Por qué no</th></tr>
+      <tr><td>Instagram / TikTok</td><td style="text-align:left">Meses de contenido antes del primer cliente</td></tr>
+      <tr><td>Web con Google Ads</td><td style="text-align:left">Cuesta por adelantado y compites con empresas grandes</td></tr>
+      <tr><td>Licitaciones del Estado</td><td style="text-align:left">RNC, RPE, fianzas y meses de trámite</td></tr>
+    </table>
+  </div>
+
+  <div class="note">
+    <strong>Si solo tienes 3 horas:</strong> 60 min de mensajes a 20 contactos ·
+    60 min visitando 5 ferreterías · 30 min publicando en Marketplace y Corotos ·
+    30 min en 3 grupos de Facebook. Con eso, 30–50 personas saben que existes.
+    <strong>Necesitas que una sola diga que sí.</strong>
+  </div>
+</section>
+
+<footer>
+  <p>
+    Cuando cierres el primer trabajo, dime <strong>qué canal te lo trajo</strong>,
+    <strong>cuánto facturaste</strong> y <strong>qué objeción te costó más responder</strong>.
+    Con eso te ajusto los precios, reescribo los anuncios enfocados en lo que sí funcionó,
+    y te armo el plan del mes 2.
+  </p>
+  <p style="margin-top:1rem">
+    Precios basados en referencias del mercado dominicano 2026. Ajústalos a tu zona
+    y revisa tu costo real de material antes de cerrar cualquier precio.
+  </p>
+</footer>
+
+</div>
+
+<script>
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.closest(".copy").querySelector("pre");
+      var text = pre.textContent;
+      var done = function () {
+        btn.textContent = "Copiado ✓";
+        btn.dataset.done = "1";
+        setTimeout(function () {
+          btn.textContent = "Copiar";
+          delete btn.dataset.done;
+        }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else {
+        fallback();
+      }
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) { btn.textContent = "Selecciona y copia"; }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+</script>
