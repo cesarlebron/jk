@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cotizador de Obra</title>
+<meta name="description" content="Cotizador de construcción: arma una cotización profesional en minutos, con margen real y sin perder plata.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="../src/styles.css">
+</head>
+<body>
+
+<header class="barra">
+  <div class="marca">🏗️ Cotizador de Obra <small>· sin internet, sin cuentas</small></div>
+  <button id="nueva">Nueva</button>
+  <button id="guardar">Guardar</button>
+  <button id="exportar">Respaldo</button>
+  <label for="importar" style="margin:0">
+    <span class="solo-lectores">Restaurar respaldo</span>
+    <button type="button" onclick="document.getElementById('importar').click()">Restaurar</button>
+  </label>
+  <input type="file" id="importar" accept="application/json,.json" hidden>
+  <button id="imprimir" class="primario">Imprimir / PDF</button>
+</header>
+
+<main class="envoltura">
+  <div class="rejilla">
+
+    <div class="columna-principal">
+
+      <!-- ── Datos de la empresa ── -->
+      <details class="tarjeta" id="tarjeta-empresa">
+        <summary style="cursor:pointer;font-weight:700">Datos de mi empresa (salen en la cotización)</summary>
+        <div class="campos" style="margin-top:.8rem">
+          <div><label for="e-nombre">Nombre de la empresa</label><input id="e-nombre" data-empresa="nombre" placeholder="Constructora Ashanny"></div>
+          <div><label for="e-rnc">RNC / Cédula</label><input id="e-rnc" data-empresa="rnc" placeholder="1-31-12345-6"></div>
+          <div><label for="e-tel">Teléfono</label><input id="e-tel" data-empresa="telefono" placeholder="809-000-0000"></div>
+          <div><label for="e-correo">Correo</label><input id="e-correo" data-empresa="correo" type="email" placeholder="correo@empresa.com"></div>
+          <div style="grid-column:1/-1"><label for="e-dir">Dirección</label><input id="e-dir" data-empresa="direccion" placeholder="Calle, sector, ciudad"></div>
+        </div>
+        <div style="margin-top:.8rem;display:flex;gap:.7rem;align-items:center;flex-wrap:wrap">
+          <div><label for="logo">Logo (opcional, máx. 400 KB)</label><input type="file" id="logo" accept="image/*"></div>
+          <img id="vista-logo" alt="Logo actual" style="max-height:52px;max-width:150px;object-fit:contain" hidden>
+          <button id="quitar-logo" type="button">Quitar logo</button>
+        </div>
+      </details>
+
+      <!-- ── Datos de la cotización ── -->
+      <section class="tarjeta">
+        <h2>Cotización</h2>
+        <div class="campos">
+          <div><label for="c-num">Número</label><input id="c-num" data-cot="numero"></div>
+          <div><label for="c-fecha">Fecha</label><input id="c-fecha" type="date" data-cot="fecha"></div>
+          <div><label for="c-val">Validez (días)</label><input id="c-val" type="number" min="1" step="1" data-cot="validez"></div>
+          <div><label for="c-cli">Cliente</label><input id="c-cli" data-cot="cliente" placeholder="Nombre del cliente"></div>
+          <div><label for="c-tel">Teléfono del cliente</label><input id="c-tel" data-cot="telefonoCliente" placeholder="809-000-0000"></div>
+          <div><label for="c-obra">Obra</label><input id="c-obra" data-cot="obra" placeholder="Remodelación de baño y cocina"></div>
+          <div style="grid-column:1/-1"><label for="c-ubi">Ubicación</label><input id="c-ubi" data-cot="ubicacion" placeholder="Calle, sector, ciudad"></div>
+          <div style="grid-column:1/-1"><label for="c-notas">Condiciones (salen impresas)</label><textarea id="c-notas" data-cot="notas"></textarea></div>
+        </div>
+      </section>
+
+      <!-- ── Partidas ── -->
+      <section class="tarjeta">
+        <h2>Partidas de obra</h2>
+        <div class="buscador" style="margin:.6rem 0 .8rem">
+          <label for="buscar">Buscar en el catálogo — escribe, usa ↑↓ y Enter para agregar</label>
+          <input id="buscar" type="search" autocomplete="off" role="combobox" aria-expanded="false"
+                 aria-controls="resultados" placeholder="bloque, pañete, piso, punto eléctrico…">
+          <div class="resultados" id="resultados" hidden></div>
+        </div>
+
+        <div class="tabla-envoltura">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-desc">Descripción</th>
+                <th class="col-uni">Ud.</th>
+                <th class="num col-num">Cantidad</th>
+                <th class="num col-num">Material</th>
+                <th class="num col-num">Mano obra</th>
+                <th class="num col-num">Desp. %</th>
+                <th class="num">Importe</th>
+                <th><span class="solo-lectores">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo-partidas"></tbody>
+          </table>
+        </div>
+
+        <button id="agregar-linea" style="margin-top:.7rem">+ Línea en blanco</button>
+        <p style="font-size:.78rem;color:var(--suave);margin:.7rem 0 0">
+          Los costos son <strong>tuyos</strong>: material y mano de obra sin ganancia.
+          La utilidad se agrega abajo, una sola vez, sobre el total. El cliente nunca
+          ve esta tabla — solo el precio de venta ya integrado.
+        </p>
+      </section>
+
+    </div>
+
+    <!-- ── Panel lateral ── -->
+    <aside class="columna-lateral">
+
+      <section class="tarjeta">
+        <h2>Precio y utilidad</h2>
+        <div class="campos" style="grid-template-columns:1fr 1fr">
+          <div><label for="cf-gg">Gastos generales %</label><input id="cf-gg" type="number" step="any" min="0" data-config="gastosGenerales"></div>
+          <div><label for="cf-imp">Imprevistos %</label><input id="cf-imp" type="number" step="any" min="0" data-config="imprevistos"></div>
+          <div style="grid-column:1/-1">
+            <label for="cf-modo">Modo de ganancia</label>
+            <select id="cf-modo" data-config="modoUtilidad">
+              <option value="margen">Margen sobre la venta (recomendado)</option>
+              <option value="markup">Markup sobre el costo</option>
+            </select>
+          </div>
+          <div><label for="cf-uti">Ganancia %</label><input id="cf-uti" type="number" step="any" min="0" data-config="utilidad"></div>
+          <div><label for="cf-itbis">Impuesto %</label><input id="cf-itbis" type="number" step="any" min="0" data-config="impuesto"></div>
+          <div><label for="cf-ant">Anticipo %</label><input id="cf-ant" type="number" step="any" min="0" max="100" data-config="anticipo"></div>
+          <div><label for="cf-mon">Moneda</label><input id="cf-mon" data-config="moneda" maxlength="3" placeholder="USD"></div>
+          <div style="grid-column:1/-1;display:flex;gap:.45rem;align-items:center">
+            <input type="checkbox" id="cf-incl" data-config="impuestoIncluido" style="width:auto">
+            <label for="cf-incl" style="margin:0">El precio ya incluye el impuesto</label>
+          </div>
+        </div>
+        <div id="error-config" class="aviso malo" hidden></div>
+      </section>
+
+      <section class="tarjeta">
+        <h2>Resumen</h2>
+        <div id="panel-totales"></div>
+        <div id="avisos"></div>
+      </section>
+
+      <section class="tarjeta">
+        <h2>Guardadas</h2>
+        <div id="historial"></div>
+      </section>
+
+    </aside>
+  </div>
+
+  <!-- Solo visible al imprimir: el documento que ve el cliente. -->
+  <div id="documento"></div>
+</main>
+
+<div id="aviso-flotante" class="aviso-flotante" role="status" aria-live="polite"></div>
+
+<script type="module" src="../src/ui.js"></script>
+</body>
+</html>

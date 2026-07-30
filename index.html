@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cotizador de Obra — cotiza en 10 minutos y deja de perder plata en el margen</title>
+<meta name="description" content="Herramienta gratuita para contratistas: arma una cotización profesional en 10 minutos, con margen real calculado bien. Funciona sin internet, en el celular, sin cuentas.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Cotizador de Obra para contratistas">
+<meta property="og:description" content="Cotiza en 10 minutos, con margen real. Sin internet, sin cuentas, sin mensualidad.">
+<meta property="og:type" content="website">
+<style>
+:root{--fondo:#fbfaf8;--panel:#fff;--borde:#e6e2db;--texto:#191614;--suave:#6b6560;--acento:#b45309;--acento2:#92400e;--ok:#15803d}
+@media(prefers-color-scheme:dark){:root{--fondo:#12100e;--panel:#1b1815;--borde:#332e29;--texto:#f0ece7;--suave:#a49a90;--acento:#f59e0b;--acento2:#fbbf24;--ok:#4ade80}}
+*{box-sizing:border-box}
+body{margin:0;font:17px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--texto);background:var(--fondo);-webkit-text-size-adjust:100%}
+.env{max-width:760px;margin:0 auto;padding:0 1.2rem}
+h1{font-size:clamp(1.9rem,5.2vw,2.9rem);line-height:1.12;letter-spacing:-.02em;margin:0 0 .8rem}
+h2{font-size:clamp(1.3rem,3.4vw,1.7rem);line-height:1.2;letter-spacing:-.01em;margin:0 0 .7rem}
+h3{font-size:1.02rem;margin:0 0 .3rem}
+p{margin:0 0 1rem}
+a{color:var(--acento);text-underline-offset:3px}
+.tenue{color:var(--suave)}
+.pequeño{font-size:.9rem}
+
+header{padding:3.4rem 0 2.6rem;border-bottom:1px solid var(--borde)}
+.etiqueta{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--acento);margin-bottom:.9rem}
+.entrada{font-size:1.12rem;color:var(--suave);max-width:56ch}
+
+.botones{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.7rem}
+.btn{display:inline-block;padding:.78rem 1.35rem;border-radius:9px;border:1px solid var(--borde);background:var(--panel);color:var(--texto);text-decoration:none;font-weight:650}
+.btn:hover{border-color:var(--acento)}
+.btn.primario{background:var(--acento);border-color:var(--acento);color:#fff}
+.btn.primario:hover{background:var(--acento2)}
+
+section{padding:2.7rem 0;border-bottom:1px solid var(--borde)}
+
+.dolor{background:var(--panel);border:1px solid var(--borde);border-left:3px solid var(--acento);border-radius:0 10px 10px 0;padding:1.1rem 1.2rem;margin:1.3rem 0}
+.dolor strong{display:block;margin-bottom:.3rem}
+
+table.demo{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.94rem}
+table.demo th,table.demo td{padding:.55rem .6rem;border-bottom:1px solid var(--borde);text-align:left}
+table.demo th{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--suave)}
+table.demo td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.demo tr.destacada td{font-weight:700;color:var(--acento)}
+.tabla-scroll{overflow-x:auto}
+
+ul.limpia{list-style:none;padding:0;margin:1rem 0}
+ul.limpia li{padding-left:1.6rem;position:relative;margin-bottom:.7rem}
+ul.limpia li::before{content:"→";position:absolute;left:0;color:var(--acento);font-weight:700}
+
+.rejilla{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));margin-top:1.3rem}
+.caja{background:var(--panel);border:1px solid var(--borde);border-radius:10px;padding:1rem}
+.caja p{margin:0;font-size:.93rem;color:var(--suave)}
+
+figure{margin:1.4rem 0}
+figure img{width:100%;height:auto;border:1px solid var(--borde);border-radius:10px;display:block}
+figcaption{font-size:.85rem;color:var(--suave);margin-top:.5rem;text-align:center}
+
+details{border:1px solid var(--borde);border-radius:9px;padding:.75rem .95rem;margin-bottom:.6rem;background:var(--panel)}
+summary{cursor:pointer;font-weight:650}
+details p{margin:.7rem 0 0;font-size:.95rem;color:var(--suave)}
+
+footer{padding:2.2rem 0 3rem;font-size:.9rem;color:var(--suave)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="env">
+    <span class="etiqueta">Gratis · Código abierto · Sin cuentas</span>
+    <h1>Cotiza una obra en 10 minutos, y con el margen que de verdad creías tener.</h1>
+    <p class="entrada">
+      Un cotizador para contratistas pequeños. Se abre como un archivo,
+      funciona sin internet, y te avisa antes de que firmes una obra que pierde.
+    </p>
+    <div class="botones">
+      <a class="btn primario" href="app/">Abrir el cotizador</a>
+      <a class="btn" href="dist/cotizador.html" download>Descargar (1 archivo, 65 KB)</a>
+    </div>
+    <p class="pequeño tenue" style="margin-top:1rem">
+      Sin registro, sin mensualidad, sin subir tus precios a ningún servidor.
+    </p>
+  </div>
+</header>
+
+<section>
+  <div class="env">
+    <h2>El error de $833 que casi todo contratista comete</h2>
+    <p>
+      Tu obra cuesta <strong>$10,000</strong>. Quieres ganar <strong>25%</strong>.
+      Entonces multiplicas por 1.25 y cotizas $12,500.
+    </p>
+
+    <div class="tabla-scroll">
+      <table class="demo">
+        <thead><tr><th>Cómo lo calculas</th><th class="n">Cobras</th><th class="n">Ganas</th><th class="n">Margen real</th></tr></thead>
+        <tbody>
+          <tr><td>Costo × 1.25 <span class="tenue">(lo que casi todos hacen)</span></td><td class="n">$12,500.00</td><td class="n">$2,500.00</td><td class="n">20.0%</td></tr>
+          <tr class="destacada"><td>Costo ÷ 0.75 <span style="font-weight:400">(margen real del 25%)</span></td><td class="n">$13,333.33</td><td class="n">$3,333.33</td><td class="n">25.0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      <strong>$833 de diferencia en una sola cotización.</strong> No porque cobraras
+      barato a propósito, sino porque el 25% sobre el costo no es 25% sobre la venta.
+      En diez obras al año son <strong>$8,333</strong> que nunca supiste que dejaste en la mesa.
+    </p>
+    <p class="tenue pequeño">
+      El cotizador calcula margen real por defecto. Si prefieres trabajar con markup,
+      también puedes — pero te muestra en pantalla, en pesos, cuánto te está costando.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="env">
+    <h2>Lo que hace</h2>
+    <ul class="limpia">
+      <li><strong>Catálogo de 48 partidas listas</strong> — bloques, pañete, hormigón, pisos, puntos eléctricos y sanitarios, pintura, techo. Buscas "bloque 6", das Enter, y ya está en la cotización.</li>
+      <li><strong>Tus costos, no los de nadie más.</strong> Ajustas material y mano de obra a los precios de tu ferretería y quedan guardados.</li>
+      <li><strong>Desperdicio aplicado donde va.</strong> Sobre el material, nunca sobre la mano de obra. Al ayudante le pagas por pegar el bloque, no por el que se rompió.</li>
+      <li><strong>Gastos generales e imprevistos</strong> como líneas propias, para que dejen de salir de tu bolsillo.</li>
+      <li><strong>Cotización impresa profesional</strong> — con tu logo, tus condiciones y las firmas. El cliente ve un precio limpio, nunca tus costos.</li>
+      <li><strong>Anticipo y saldo calculados</strong>, para que cobres antes de comprar el material.</li>
+    </ul>
+
+    <figure>
+      <img src="muestra-documento.png" alt="Ejemplo de cotización impresa: encabezado con los datos de la constructora, tabla de once partidas de obra con unidad, cantidad, precio unitario e importe, subtotal, impuesto, total, forma de pago con anticipo y saldo, condiciones y espacio para firmas." loading="lazy">
+      <figcaption>Cotización real generada por la herramienta. Se imprime o se guarda como PDF desde el navegador.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="env">
+    <h2>Te avisa antes de que sea tarde</h2>
+    <p>Mientras cotizas, la herramienta revisa lo que estás a punto de firmar:</p>
+    <div class="rejilla">
+      <div class="caja">
+        <h3>Margen bajo</h3>
+        <p>Por debajo del 10% te dice, en pesos, cuál es el punto donde empiezas a trabajar gratis.</p>
+      </div>
+      <div class="caja">
+        <h3>Sin imprevistos</h3>
+        <p>Si dejaste la contingencia en cero, te lo recuerda. En obra siempre aparece algo.</p>
+      </div>
+      <div class="caja">
+        <h3>Anticipo corto</h3>
+        <p>Te dice cuánto material vas a estar financiando tú si cobras menos del 40% al firmar.</p>
+      </div>
+      <div class="caja">
+        <h3>Markup disfrazado</h3>
+        <p>Si usas markup, te muestra el margen real y la diferencia exacta en esta cotización.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="env">
+    <h2>Funciona donde trabajas</h2>
+    <p>
+      Es <strong>un solo archivo HTML</strong>. Lo descargas, lo guardas en el celular
+      y se abre sin señal, parado en medio de la obra. No hay servidor que se caiga,
+      no hay cuenta que recuperar, no hay mensualidad que se te olvide pagar.
+    </p>
+    <p>
+      Tus precios de compra quedan guardados solo en tu navegador. Nadie más los ve —
+      y lo que le pagas al bloquero es parte de tu ventaja competitiva.
+    </p>
+    <div class="botones">
+      <a class="btn primario" href="app/">Probarlo ahora</a>
+      <a class="btn" href="dist/cotizador.html" download>Descargar para usar sin internet</a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="env">
+    <h2>Preguntas</h2>
+
+    <details>
+      <summary>¿Es gratis de verdad?</summary>
+      <p>Sí. Licencia MIT: úsalo, cámbialo y véndelo si quieres. No hay versión "pro" ni límite de cotizaciones.</p>
+    </details>
+
+    <details>
+      <summary>¿Los precios del catálogo sirven en mi país?</summary>
+      <p>Son un punto de partida en dólares, con órdenes de magnitud del mercado caribeño y latinoamericano. Están pensados para ajustarse: siéntate media hora con tres facturas recientes de tu ferretería, corrige las partidas que más usas, y a partir de ahí cotiza con tus números reales.</p>
+    </details>
+
+    <details>
+      <summary>¿Se me pueden perder las cotizaciones?</summary>
+      <p>Se guardan en tu navegador. Si borras los datos del navegador o cambias de teléfono, se van. Por eso hay un botón de <strong>Respaldo</strong> que descarga todo en un archivo — mándatelo por correo de vez en cuando y estás cubierto.</p>
+    </details>
+
+    <details>
+      <summary>¿El cliente ve lo que me cuesta el material?</summary>
+      <p>Nunca. La tabla de costos es solo tuya. El documento impreso muestra un precio unitario de venta que ya lleva tus gastos y tu ganancia por dentro, repartidos entre las partidas.</p>
+    </details>
+
+    <details>
+      <summary>¿Y el impuesto?</summary>
+      <p>Configurable. Viene en 18% (ITBIS de República Dominicana), pero lo cambias al de tu país o lo pones en cero. También puedes cotizar con el impuesto ya incluido en el precio.</p>
+    </details>
+  </div>
+</section>
+
+<footer>
+  <div class="env">
+    <p>
+      Hecho para contratistas que cotizan de noche, después de la obra.
+      Código abierto bajo licencia MIT.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

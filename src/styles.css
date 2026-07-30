@@ -1,0 +1,250 @@
+/* Cotizador Ashanny — hoja de estilos única.
+   Prioridades, en orden: legible en un celular al sol, imprimible como
+   documento serio, y liviano (cero dependencias, cero fuentes remotas). */
+
+:root {
+  --fondo: #f4f5f7;
+  --panel: #ffffff;
+  --borde: #dfe3e8;
+  --texto: #14181f;
+  --suave: #5f6b7a;
+  --acento: #b45309;
+  --acento-fuerte: #92400e;
+  --acento-claro: #fef3c7;
+  --ok: #15803d;
+  --alerta: #b91c1c;
+  --alerta-fondo: #fee2e2;
+  --sombra: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .1);
+  --r: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #0f1319;
+    --panel: #171c24;
+    --borde: #2a323d;
+    --texto: #e8ecf1;
+    --suave: #9aa6b4;
+    --acento: #f59e0b;
+    --acento-fuerte: #fbbf24;
+    --acento-claro: #3a2c0b;
+    --ok: #4ade80;
+    --alerta: #f87171;
+    --alerta-fondo: #3b1414;
+    --sombra: none;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--texto);
+  background: var(--fondo);
+  -webkit-text-size-adjust: 100%;
+}
+
+h1, h2, h3 { margin: 0 0 .4rem; line-height: 1.25; }
+h1 { font-size: 1.25rem; }
+h2 { font-size: 1rem; letter-spacing: .01em; }
+h3 { font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; color: var(--suave); }
+
+/* ── Estructura ─────────────────────────────────────────────────────── */
+
+.barra {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
+  padding: .6rem .9rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--borde);
+}
+.barra .marca { font-weight: 700; margin-right: auto; display: flex; align-items: center; gap: .5rem; }
+.barra .marca small { font-weight: 400; color: var(--suave); }
+
+.envoltura { max-width: 1180px; margin: 0 auto; padding: 1rem .9rem 5rem; }
+
+/* minmax(0, 1fr) y no 1fr: `1fr` equivale a minmax(auto, 1fr), así que la
+   columna se estira hasta el ancho de la tabla de partidas y desborda la
+   página entera en el celular, en vez de dejar que la tabla scrollee sola. */
+.rejilla { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
+.columna-principal, .columna-lateral { min-width: 0; }
+
+@media (min-width: 1000px) {
+  .rejilla { grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
+  .columna-lateral { position: sticky; top: 4rem; }
+}
+
+.tarjeta {
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--r);
+  padding: .9rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--sombra);
+}
+
+.campos { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+label { display: block; font-size: .78rem; font-weight: 600; color: var(--suave); margin-bottom: .2rem; }
+
+input, select, textarea, button {
+  font: inherit;
+  color: var(--texto);
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: .5rem .6rem;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--fondo);
+}
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--acento);
+  outline-offset: -1px;
+  background: var(--panel);
+}
+textarea { min-height: 70px; resize: vertical; }
+input[type="number"] { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Móvil: 16px evita que iOS haga zoom al enfocar un campo. */
+@media (max-width: 640px) { input, select, textarea { font-size: 16px; } }
+
+button {
+  cursor: pointer;
+  padding: .5rem .8rem;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--panel);
+  font-weight: 600;
+  transition: background .12s, border-color .12s;
+}
+button:hover { border-color: var(--acento); }
+button:active { transform: translateY(1px); }
+button.primario { background: var(--acento); border-color: var(--acento); color: #fff; }
+button.primario:hover { background: var(--acento-fuerte); }
+button.icono { padding: .35rem .5rem; line-height: 1; }
+button.peligro:hover { border-color: var(--alerta); color: var(--alerta); }
+
+/* ── Tabla de partidas ──────────────────────────────────────────────── */
+
+/* `position: relative` no es decorativo: convierte a este contenedor en el
+   bloque contenedor de los `.solo-lectores` que viven dentro de la tabla. Sin
+   él, esos spans absolutos se anclan al viewport en su posición estática
+   (x≈690) y estiran el scroll horizontal de TODA la página en el celular,
+   aunque sean invisibles. */
+.tabla-envoltura { overflow-x: auto; -webkit-overflow-scrolling: touch; position: relative; }
+
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td { padding: .4rem .45rem; text-align: left; border-bottom: 1px solid var(--borde); vertical-align: middle; }
+th { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--suave); white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tbody tr:hover { background: color-mix(in srgb, var(--acento) 5%, transparent); }
+
+table input, table select { padding: .3rem .4rem; border-radius: 6px; }
+.col-desc { min-width: 200px; }
+.col-num { width: 92px; }
+.col-uni { width: 78px; }
+
+.vacio { padding: 2rem 1rem; text-align: center; color: var(--suave); }
+
+/* ── Buscador del catálogo ──────────────────────────────────────────── */
+
+.buscador { position: relative; }
+.resultados {
+  position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px);
+  max-height: 320px; overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--r);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, .16);
+}
+.resultados li {
+  list-style: none; padding: .5rem .7rem; cursor: pointer;
+  display: flex; gap: .6rem; align-items: baseline;
+  border-bottom: 1px solid var(--borde);
+}
+.resultados li:last-child { border-bottom: 0; }
+.resultados li:hover, .resultados li[aria-selected="true"] { background: var(--acento-claro); }
+.resultados ul { margin: 0; padding: 0; }
+.resultados .codigo { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .74rem; color: var(--suave); }
+.resultados .precio { margin-left: auto; font-variant-numeric: tabular-nums; font-size: .82rem; color: var(--suave); }
+
+/* ── Totales ────────────────────────────────────────────────────────── */
+
+.total-linea { display: flex; justify-content: space-between; gap: 1rem; padding: .3rem 0; font-variant-numeric: tabular-nums; }
+.total-linea span:last-child { font-weight: 600; }
+.total-linea.separador { border-top: 1px solid var(--borde); margin-top: .4rem; padding-top: .55rem; }
+.total-linea.grande { font-size: 1.15rem; font-weight: 700; color: var(--acento); }
+.total-linea.tenue { color: var(--suave); font-size: .84rem; }
+
+.aviso {
+  border-left: 3px solid var(--acento);
+  background: var(--acento-claro);
+  padding: .55rem .7rem;
+  border-radius: 0 8px 8px 0;
+  font-size: .84rem;
+  margin-top: .7rem;
+}
+.aviso.malo { border-color: var(--alerta); background: var(--alerta-fondo); }
+.aviso strong { display: block; margin-bottom: .15rem; }
+
+.pastilla { display: inline-block; padding: .1rem .45rem; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+.pastilla.ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.pastilla.mal { background: var(--alerta-fondo); color: var(--alerta); }
+
+/* ── Documento imprimible ───────────────────────────────────────────── */
+
+#documento { display: none; }
+
+.doc-cabecera { display: flex; justify-content: space-between; gap: 2rem; align-items: flex-start; margin-bottom: 1.2rem; }
+.doc-cabecera img { max-height: 70px; max-width: 190px; object-fit: contain; }
+.doc-titulo { text-align: right; }
+.doc-titulo h2 { font-size: 1.4rem; color: var(--acento); margin: 0; }
+.doc-partes { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem; }
+.doc-nota { font-size: .8rem; color: var(--suave); white-space: pre-wrap; }
+.doc-firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 3rem; }
+.doc-firmas div { border-top: 1px solid var(--texto); padding-top: .35rem; font-size: .8rem; text-align: center; }
+
+@media print {
+  @page { margin: 14mm; }
+  body { background: #fff; color: #000; font-size: 11pt; }
+  /* El aviso flotante va aquí a propósito: es un elemento suelto en <body>,
+     así que no lo tapa ninguna de las otras reglas, y salía impreso encima
+     de la cotización del cliente. */
+  .barra, .columna-lateral, .no-imprimir,
+  .envoltura > .rejilla, .aviso-flotante { display: none !important; }
+  #documento { display: block !important; }
+  #documento table { font-size: 9.5pt; }
+  #documento th { border-bottom: 1.5px solid #000; color: #000; }
+  #documento td { border-bottom: .5px solid #bbb; }
+  .doc-titulo h2 { color: #000; }
+  .doc-total { font-weight: 700; font-size: 12pt; }
+  tr { page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  .doc-firmas { page-break-inside: avoid; }
+}
+
+/* ── Accesibilidad y detalles ───────────────────────────────────────── */
+
+.solo-lectores {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.aviso-flotante {
+  position: fixed; left: 50%; bottom: 1.2rem; transform: translateX(-50%);
+  background: var(--texto); color: var(--fondo);
+  padding: .55rem 1rem; border-radius: 999px;
+  font-size: .86rem; font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+  z-index: 50;
+}
+.aviso-flotante.visible { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

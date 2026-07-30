@@ -1,0 +1,1547 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cotizador de Obra</title>
+<meta name="description" content="Cotizador de construcción: arma una cotización profesional en minutos, con margen real y sin perder plata.">
+<meta name="color-scheme" content="light dark">
+<!-- Archivo único y autocontenido. Funciona sin internet, desde el escritorio
+     o desde el celular. Generado por build.js — no editar a mano. -->
+<style>
+/* Cotizador Ashanny — hoja de estilos única.
+   Prioridades, en orden: legible en un celular al sol, imprimible como
+   documento serio, y liviano (cero dependencias, cero fuentes remotas). */
+
+:root {
+  --fondo: #f4f5f7;
+  --panel: #ffffff;
+  --borde: #dfe3e8;
+  --texto: #14181f;
+  --suave: #5f6b7a;
+  --acento: #b45309;
+  --acento-fuerte: #92400e;
+  --acento-claro: #fef3c7;
+  --ok: #15803d;
+  --alerta: #b91c1c;
+  --alerta-fondo: #fee2e2;
+  --sombra: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .1);
+  --r: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #0f1319;
+    --panel: #171c24;
+    --borde: #2a323d;
+    --texto: #e8ecf1;
+    --suave: #9aa6b4;
+    --acento: #f59e0b;
+    --acento-fuerte: #fbbf24;
+    --acento-claro: #3a2c0b;
+    --ok: #4ade80;
+    --alerta: #f87171;
+    --alerta-fondo: #3b1414;
+    --sombra: none;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--texto);
+  background: var(--fondo);
+  -webkit-text-size-adjust: 100%;
+}
+
+h1, h2, h3 { margin: 0 0 .4rem; line-height: 1.25; }
+h1 { font-size: 1.25rem; }
+h2 { font-size: 1rem; letter-spacing: .01em; }
+h3 { font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; color: var(--suave); }
+
+/* ── Estructura ─────────────────────────────────────────────────────── */
+
+.barra {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
+  padding: .6rem .9rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--borde);
+}
+.barra .marca { font-weight: 700; margin-right: auto; display: flex; align-items: center; gap: .5rem; }
+.barra .marca small { font-weight: 400; color: var(--suave); }
+
+.envoltura { max-width: 1180px; margin: 0 auto; padding: 1rem .9rem 5rem; }
+
+/* minmax(0, 1fr) y no 1fr: `1fr` equivale a minmax(auto, 1fr), así que la
+   columna se estira hasta el ancho de la tabla de partidas y desborda la
+   página entera en el celular, en vez de dejar que la tabla scrollee sola. */
+.rejilla { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
+.columna-principal, .columna-lateral { min-width: 0; }
+
+@media (min-width: 1000px) {
+  .rejilla { grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
+  .columna-lateral { position: sticky; top: 4rem; }
+}
+
+.tarjeta {
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--r);
+  padding: .9rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--sombra);
+}
+
+.campos { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+label { display: block; font-size: .78rem; font-weight: 600; color: var(--suave); margin-bottom: .2rem; }
+
+input, select, textarea, button {
+  font: inherit;
+  color: var(--texto);
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: .5rem .6rem;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--fondo);
+}
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--acento);
+  outline-offset: -1px;
+  background: var(--panel);
+}
+textarea { min-height: 70px; resize: vertical; }
+input[type="number"] { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Móvil: 16px evita que iOS haga zoom al enfocar un campo. */
+@media (max-width: 640px) { input, select, textarea { font-size: 16px; } }
+
+button {
+  cursor: pointer;
+  padding: .5rem .8rem;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--panel);
+  font-weight: 600;
+  transition: background .12s, border-color .12s;
+}
+button:hover { border-color: var(--acento); }
+button:active { transform: translateY(1px); }
+button.primario { background: var(--acento); border-color: var(--acento); color: #fff; }
+button.primario:hover { background: var(--acento-fuerte); }
+button.icono { padding: .35rem .5rem; line-height: 1; }
+button.peligro:hover { border-color: var(--alerta); color: var(--alerta); }
+
+/* ── Tabla de partidas ──────────────────────────────────────────────── */
+
+/* `position: relative` no es decorativo: convierte a este contenedor en el
+   bloque contenedor de los `.solo-lectores` que viven dentro de la tabla. Sin
+   él, esos spans absolutos se anclan al viewport en su posición estática
+   (x≈690) y estiran el scroll horizontal de TODA la página en el celular,
+   aunque sean invisibles. */
+.tabla-envoltura { overflow-x: auto; -webkit-overflow-scrolling: touch; position: relative; }
+
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td { padding: .4rem .45rem; text-align: left; border-bottom: 1px solid var(--borde); vertical-align: middle; }
+th { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--suave); white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tbody tr:hover { background: color-mix(in srgb, var(--acento) 5%, transparent); }
+
+table input, table select { padding: .3rem .4rem; border-radius: 6px; }
+.col-desc { min-width: 200px; }
+.col-num { width: 92px; }
+.col-uni { width: 78px; }
+
+.vacio { padding: 2rem 1rem; text-align: center; color: var(--suave); }
+
+/* ── Buscador del catálogo ──────────────────────────────────────────── */
+
+.buscador { position: relative; }
+.resultados {
+  position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px);
+  max-height: 320px; overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--r);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, .16);
+}
+.resultados li {
+  list-style: none; padding: .5rem .7rem; cursor: pointer;
+  display: flex; gap: .6rem; align-items: baseline;
+  border-bottom: 1px solid var(--borde);
+}
+.resultados li:last-child { border-bottom: 0; }
+.resultados li:hover, .resultados li[aria-selected="true"] { background: var(--acento-claro); }
+.resultados ul { margin: 0; padding: 0; }
+.resultados .codigo { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .74rem; color: var(--suave); }
+.resultados .precio { margin-left: auto; font-variant-numeric: tabular-nums; font-size: .82rem; color: var(--suave); }
+
+/* ── Totales ────────────────────────────────────────────────────────── */
+
+.total-linea { display: flex; justify-content: space-between; gap: 1rem; padding: .3rem 0; font-variant-numeric: tabular-nums; }
+.total-linea span:last-child { font-weight: 600; }
+.total-linea.separador { border-top: 1px solid var(--borde); margin-top: .4rem; padding-top: .55rem; }
+.total-linea.grande { font-size: 1.15rem; font-weight: 700; color: var(--acento); }
+.total-linea.tenue { color: var(--suave); font-size: .84rem; }
+
+.aviso {
+  border-left: 3px solid var(--acento);
+  background: var(--acento-claro);
+  padding: .55rem .7rem;
+  border-radius: 0 8px 8px 0;
+  font-size: .84rem;
+  margin-top: .7rem;
+}
+.aviso.malo { border-color: var(--alerta); background: var(--alerta-fondo); }
+.aviso strong { display: block; margin-bottom: .15rem; }
+
+.pastilla { display: inline-block; padding: .1rem .45rem; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+.pastilla.ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.pastilla.mal { background: var(--alerta-fondo); color: var(--alerta); }
+
+/* ── Documento imprimible ───────────────────────────────────────────── */
+
+#documento { display: none; }
+
+.doc-cabecera { display: flex; justify-content: space-between; gap: 2rem; align-items: flex-start; margin-bottom: 1.2rem; }
+.doc-cabecera img { max-height: 70px; max-width: 190px; object-fit: contain; }
+.doc-titulo { text-align: right; }
+.doc-titulo h2 { font-size: 1.4rem; color: var(--acento); margin: 0; }
+.doc-partes { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem; }
+.doc-nota { font-size: .8rem; color: var(--suave); white-space: pre-wrap; }
+.doc-firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 3rem; }
+.doc-firmas div { border-top: 1px solid var(--texto); padding-top: .35rem; font-size: .8rem; text-align: center; }
+
+@media print {
+  @page { margin: 14mm; }
+  body { background: #fff; color: #000; font-size: 11pt; }
+  /* El aviso flotante va aquí a propósito: es un elemento suelto en <body>,
+     así que no lo tapa ninguna de las otras reglas, y salía impreso encima
+     de la cotización del cliente. */
+  .barra, .columna-lateral, .no-imprimir,
+  .envoltura > .rejilla, .aviso-flotante { display: none !important; }
+  #documento { display: block !important; }
+  #documento table { font-size: 9.5pt; }
+  #documento th { border-bottom: 1.5px solid #000; color: #000; }
+  #documento td { border-bottom: .5px solid #bbb; }
+  .doc-titulo h2 { color: #000; }
+  .doc-total { font-weight: 700; font-size: 12pt; }
+  tr { page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  .doc-firmas { page-break-inside: avoid; }
+}
+
+/* ── Accesibilidad y detalles ───────────────────────────────────────── */
+
+.solo-lectores {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.aviso-flotante {
+  position: fixed; left: 50%; bottom: 1.2rem; transform: translateX(-50%);
+  background: var(--texto); color: var(--fondo);
+  padding: .55rem 1rem; border-radius: 999px;
+  font-size: .86rem; font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+  z-index: 50;
+}
+.aviso-flotante.visible { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+</style>
+</head>
+<body>
+
+
+<header class="barra">
+  <div class="marca">🏗️ Cotizador de Obra <small>· sin internet, sin cuentas</small></div>
+  <button id="nueva">Nueva</button>
+  <button id="guardar">Guardar</button>
+  <button id="exportar">Respaldo</button>
+  <label for="importar" style="margin:0">
+    <span class="solo-lectores">Restaurar respaldo</span>
+    <button type="button" onclick="document.getElementById('importar').click()">Restaurar</button>
+  </label>
+  <input type="file" id="importar" accept="application/json,.json" hidden>
+  <button id="imprimir" class="primario">Imprimir / PDF</button>
+</header>
+
+<main class="envoltura">
+  <div class="rejilla">
+
+    <div class="columna-principal">
+
+      <!-- ── Datos de la empresa ── -->
+      <details class="tarjeta" id="tarjeta-empresa">
+        <summary style="cursor:pointer;font-weight:700">Datos de mi empresa (salen en la cotización)</summary>
+        <div class="campos" style="margin-top:.8rem">
+          <div><label for="e-nombre">Nombre de la empresa</label><input id="e-nombre" data-empresa="nombre" placeholder="Constructora Ashanny"></div>
+          <div><label for="e-rnc">RNC / Cédula</label><input id="e-rnc" data-empresa="rnc" placeholder="1-31-12345-6"></div>
+          <div><label for="e-tel">Teléfono</label><input id="e-tel" data-empresa="telefono" placeholder="809-000-0000"></div>
+          <div><label for="e-correo">Correo</label><input id="e-correo" data-empresa="correo" type="email" placeholder="correo@empresa.com"></div>
+          <div style="grid-column:1/-1"><label for="e-dir">Dirección</label><input id="e-dir" data-empresa="direccion" placeholder="Calle, sector, ciudad"></div>
+        </div>
+        <div style="margin-top:.8rem;display:flex;gap:.7rem;align-items:center;flex-wrap:wrap">
+          <div><label for="logo">Logo (opcional, máx. 400 KB)</label><input type="file" id="logo" accept="image/*"></div>
+          <img id="vista-logo" alt="Logo actual" style="max-height:52px;max-width:150px;object-fit:contain" hidden>
+          <button id="quitar-logo" type="button">Quitar logo</button>
+        </div>
+      </details>
+
+      <!-- ── Datos de la cotización ── -->
+      <section class="tarjeta">
+        <h2>Cotización</h2>
+        <div class="campos">
+          <div><label for="c-num">Número</label><input id="c-num" data-cot="numero"></div>
+          <div><label for="c-fecha">Fecha</label><input id="c-fecha" type="date" data-cot="fecha"></div>
+          <div><label for="c-val">Validez (días)</label><input id="c-val" type="number" min="1" step="1" data-cot="validez"></div>
+          <div><label for="c-cli">Cliente</label><input id="c-cli" data-cot="cliente" placeholder="Nombre del cliente"></div>
+          <div><label for="c-tel">Teléfono del cliente</label><input id="c-tel" data-cot="telefonoCliente" placeholder="809-000-0000"></div>
+          <div><label for="c-obra">Obra</label><input id="c-obra" data-cot="obra" placeholder="Remodelación de baño y cocina"></div>
+          <div style="grid-column:1/-1"><label for="c-ubi">Ubicación</label><input id="c-ubi" data-cot="ubicacion" placeholder="Calle, sector, ciudad"></div>
+          <div style="grid-column:1/-1"><label for="c-notas">Condiciones (salen impresas)</label><textarea id="c-notas" data-cot="notas"></textarea></div>
+        </div>
+      </section>
+
+      <!-- ── Partidas ── -->
+      <section class="tarjeta">
+        <h2>Partidas de obra</h2>
+        <div class="buscador" style="margin:.6rem 0 .8rem">
+          <label for="buscar">Buscar en el catálogo — escribe, usa ↑↓ y Enter para agregar</label>
+          <input id="buscar" type="search" autocomplete="off" role="combobox" aria-expanded="false"
+                 aria-controls="resultados" placeholder="bloque, pañete, piso, punto eléctrico…">
+          <div class="resultados" id="resultados" hidden></div>
+        </div>
+
+        <div class="tabla-envoltura">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-desc">Descripción</th>
+                <th class="col-uni">Ud.</th>
+                <th class="num col-num">Cantidad</th>
+                <th class="num col-num">Material</th>
+                <th class="num col-num">Mano obra</th>
+                <th class="num col-num">Desp. %</th>
+                <th class="num">Importe</th>
+                <th><span class="solo-lectores">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo-partidas"></tbody>
+          </table>
+        </div>
+
+        <button id="agregar-linea" style="margin-top:.7rem">+ Línea en blanco</button>
+        <p style="font-size:.78rem;color:var(--suave);margin:.7rem 0 0">
+          Los costos son <strong>tuyos</strong>: material y mano de obra sin ganancia.
+          La utilidad se agrega abajo, una sola vez, sobre el total. El cliente nunca
+          ve esta tabla — solo el precio de venta ya integrado.
+        </p>
+      </section>
+
+    </div>
+
+    <!-- ── Panel lateral ── -->
+    <aside class="columna-lateral">
+
+      <section class="tarjeta">
+        <h2>Precio y utilidad</h2>
+        <div class="campos" style="grid-template-columns:1fr 1fr">
+          <div><label for="cf-gg">Gastos generales %</label><input id="cf-gg" type="number" step="any" min="0" data-config="gastosGenerales"></div>
+          <div><label for="cf-imp">Imprevistos %</label><input id="cf-imp" type="number" step="any" min="0" data-config="imprevistos"></div>
+          <div style="grid-column:1/-1">
+            <label for="cf-modo">Modo de ganancia</label>
+            <select id="cf-modo" data-config="modoUtilidad">
+              <option value="margen">Margen sobre la venta (recomendado)</option>
+              <option value="markup">Markup sobre el costo</option>
+            </select>
+          </div>
+          <div><label for="cf-uti">Ganancia %</label><input id="cf-uti" type="number" step="any" min="0" data-config="utilidad"></div>
+          <div><label for="cf-itbis">Impuesto %</label><input id="cf-itbis" type="number" step="any" min="0" data-config="impuesto"></div>
+          <div><label for="cf-ant">Anticipo %</label><input id="cf-ant" type="number" step="any" min="0" max="100" data-config="anticipo"></div>
+          <div><label for="cf-mon">Moneda</label><input id="cf-mon" data-config="moneda" maxlength="3" placeholder="USD"></div>
+          <div style="grid-column:1/-1;display:flex;gap:.45rem;align-items:center">
+            <input type="checkbox" id="cf-incl" data-config="impuestoIncluido" style="width:auto">
+            <label for="cf-incl" style="margin:0">El precio ya incluye el impuesto</label>
+          </div>
+        </div>
+        <div id="error-config" class="aviso malo" hidden></div>
+      </section>
+
+      <section class="tarjeta">
+        <h2>Resumen</h2>
+        <div id="panel-totales"></div>
+        <div id="avisos"></div>
+      </section>
+
+      <section class="tarjeta">
+        <h2>Guardadas</h2>
+        <div id="historial"></div>
+      </section>
+
+    </aside>
+  </div>
+
+  <!-- Solo visible al imprimir: el documento que ve el cliente. -->
+  <div id="documento"></div>
+</main>
+
+<div id="aviso-flotante" class="aviso-flotante" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+(function () {
+
+/* ═══════ src/calc.js ═══════ */
+/**
+ * Motor de cálculo de cotizaciones de construcción.
+ *
+ * Reglas de dinero que se respetan aquí (y que son la razón de que este
+ * archivo exista separado de la interfaz):
+ *
+ *  1. El desperdicio se aplica SOLO al material. La mano de obra no se
+ *     desperdicia: al ayudante se le paga por pegar el bloque, no por el
+ *     bloque roto.
+ *
+ *  2. Margen != markup. Aplicar 20% de markup sobre el costo NO deja 20%
+ *     de utilidad sobre la venta, deja 16.7%. Este es el error que más
+ *     dinero le cuesta a un contratista pequeño. Aquí se soportan los dos
+ *     modos y el modo por defecto es MARGEN real sobre precio de venta.
+ *
+ *  3. Los totales de línea se redondean ANTES de sumar. Un cliente que
+ *     suma la columna con la calculadora del teléfono tiene que llegar
+ *     exactamente al subtotal impreso, o la cotización pierde
+ *     credibilidad en la mesa.
+ */
+
+/** Redondeo a centavos, estable para los .005 (evita el sesgo de Math.round con flotantes). */
+function redondear(valor, decimales = 2) {
+  if (!Number.isFinite(valor)) return 0;
+  const factor = 10 ** decimales;
+  // El épsilon corrige casos como 1.005 * 100 = 100.49999999999999
+  return Math.round((valor + Number.EPSILON * Math.sign(valor)) * factor) / factor;
+}
+
+/** Convierte cualquier entrada de formulario a número seguro y no negativo. */
+function numero(valor, porDefecto = 0) {
+  const n = typeof valor === "number" ? valor : parseFloat(String(valor).replace(",", "."));
+  if (!Number.isFinite(n)) return porDefecto;
+  return n;
+}
+
+/** Igual que `numero` pero recorta negativos: no existen cantidades ni costos negativos. */
+function numeroPositivo(valor, porDefecto = 0) {
+  return Math.max(0, numero(valor, porDefecto));
+}
+
+const PARTIDA_VACIA = Object.freeze({
+  codigo: "",
+  descripcion: "",
+  unidad: "ud",
+  cantidad: 0,
+  costoMaterial: 0,
+  costoManoObra: 0,
+  desperdicio: 0, // fracción: 0.05 = 5%
+});
+
+/**
+ * Calcula una línea de la cotización.
+ * @returns {{material:number, manoObra:number, costoUnitario:number, total:number}}
+ */
+function calcularPartida(partida) {
+  const cantidad = numeroPositivo(partida.cantidad);
+  const desperdicio = numeroPositivo(partida.desperdicio);
+  const material = numeroPositivo(partida.costoMaterial) * (1 + desperdicio);
+  const manoObra = numeroPositivo(partida.costoManoObra);
+  const costoUnitario = material + manoObra;
+
+  return {
+    material: redondear(material),
+    manoObra: redondear(manoObra),
+    costoUnitario: redondear(costoUnitario),
+    // Se redondea el total de línea: es lo que se imprime y lo que debe sumar.
+    total: redondear(cantidad * costoUnitario),
+  };
+}
+
+const CONFIG_POR_DEFECTO = Object.freeze({
+  moneda: "USD",
+  locale: "es-DO",
+  gastosGenerales: 0.10, // administración, transporte, herramienta, supervisión
+  imprevistos: 0.05,     // contingencia
+  modoUtilidad: "margen", // "margen" (sobre venta) | "markup" (sobre costo)
+  utilidad: 0.20,
+  impuesto: 0.18,        // ITBIS / IVA. Ponlo en 0 si no facturas con impuesto.
+  impuestoIncluido: false,
+  anticipo: 0.50,        // % que se cobra al firmar
+});
+
+/**
+ * Calcula la cotización completa.
+ *
+ * @param {Array} partidas
+ * @param {object} config
+ * @returns {object} desglose completo, listo para imprimir
+ * @throws {RangeError} si el margen es >= 100% (matemáticamente imposible)
+ */
+function calcularCotizacion(partidas = [], config = {}) {
+  const cfg = { ...CONFIG_POR_DEFECTO, ...config };
+
+  const modoUtilidad = cfg.modoUtilidad === "markup" ? "markup" : "margen";
+  const utilidadPct = numeroPositivo(cfg.utilidad);
+
+  if (modoUtilidad === "margen" && utilidadPct >= 1) {
+    throw new RangeError(
+      "Un margen de 100% o más sobre el precio de venta es imposible: " +
+        "el precio tendería a infinito. Usa modo 'markup' si querías multiplicar el costo."
+    );
+  }
+
+  const lineas = partidas.map((p) => {
+    const calc = calcularPartida(p);
+    return { ...PARTIDA_VACIA, ...p, ...calc };
+  });
+
+  // Suma de totales YA redondeados => la columna impresa cuadra exactamente.
+  const costoDirecto = redondear(lineas.reduce((acc, l) => acc + l.total, 0));
+
+  const gastosGenerales = redondear(costoDirecto * numeroPositivo(cfg.gastosGenerales));
+  const imprevistos = redondear(costoDirecto * numeroPositivo(cfg.imprevistos));
+  const costoTotal = redondear(costoDirecto + gastosGenerales + imprevistos);
+
+  let subtotal; // precio de venta antes de impuesto
+  if (modoUtilidad === "markup") {
+    subtotal = redondear(costoTotal * (1 + utilidadPct));
+  } else {
+    subtotal = redondear(costoTotal / (1 - utilidadPct));
+  }
+
+  const utilidad = redondear(subtotal - costoTotal);
+  const impuestoPct = numeroPositivo(cfg.impuesto);
+
+  let baseImponible;
+  let impuesto;
+  let total;
+
+  if (cfg.impuestoIncluido) {
+    // El precio calculado YA lleva el impuesto adentro: se desglosa hacia atrás.
+    total = subtotal;
+    baseImponible = redondear(subtotal / (1 + impuestoPct));
+    impuesto = redondear(total - baseImponible);
+  } else {
+    baseImponible = subtotal;
+    impuesto = redondear(subtotal * impuestoPct);
+    total = redondear(subtotal + impuesto);
+  }
+
+  const anticipo = redondear(total * numeroPositivo(cfg.anticipo));
+
+  return {
+    lineas,
+    costoDirecto,
+    gastosGenerales,
+    imprevistos,
+    costoTotal,
+    baseImponible,
+    utilidad,
+    // Margen real conseguido sobre el precio de venta sin impuesto. Este es
+    // el número que hay que mirar, no el porcentaje que se tecleó.
+    margenReal: baseImponible > 0 ? redondear(utilidad / baseImponible, 4) : 0,
+    impuesto,
+    total,
+    anticipo,
+    saldo: redondear(total - anticipo),
+    // Punto de equilibrio: por debajo de esto se trabaja gratis o se pierde.
+    puntoEquilibrio: costoTotal,
+    config: cfg,
+  };
+}
+
+/** Formatea dinero para mostrar. */
+function formatearDinero(valor, cfg = CONFIG_POR_DEFECTO) {
+  const n = numero(valor);
+  try {
+    return new Intl.NumberFormat(cfg.locale || "es-DO", {
+      style: "currency",
+      currency: cfg.moneda || "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(n);
+  } catch {
+    return `${cfg.moneda || "USD"} ${n.toFixed(2)}`;
+  }
+}
+
+function formatearPorcentaje(fraccion, decimales = 1) {
+  return `${(numero(fraccion) * 100).toFixed(decimales)}%`;
+}
+
+/**
+ * Compara los dos modos de utilidad para el mismo costo.
+ * Sirve para mostrarle al usuario, en números, cuánto le cuesta confundirlos.
+ */
+function compararMargenMarkup(costoTotal, pct) {
+  const costo = numeroPositivo(costoTotal);
+  const p = numeroPositivo(pct);
+  const precioMarkup = redondear(costo * (1 + p));
+  const precioMargen = p < 1 ? redondear(costo / (1 - p)) : Infinity;
+  const margenRealDelMarkup =
+    precioMarkup > 0 ? redondear((precioMarkup - costo) / precioMarkup, 4) : 0;
+
+  return {
+    precioMarkup,
+    precioMargen,
+    margenRealDelMarkup,
+    diferencia: Number.isFinite(precioMargen) ? redondear(precioMargen - precioMarkup) : Infinity,
+  };
+}
+
+
+/* ═══════ src/catalog.js ═══════ */
+/**
+ * Catálogo base de partidas de obra.
+ *
+ * ⚠️ IMPORTANTE — LEE ESTO ANTES DE COTIZARLE A UN CLIENTE:
+ *
+ * Estos precios son una PLANTILLA DE ARRANQUE, no una lista de precios real.
+ * Están en el orden de magnitud del mercado caribeño/latinoamericano en USD,
+ * pero el costo de un bloque cambia por país, por ciudad y por semana.
+ *
+ * La primera vez que uses esto, siéntate 30 minutos con tres facturas
+ * recientes de tu ferretería y ajusta las partidas que más usas. A partir de
+ * ahí la herramienta cotiza con TUS costos, y ahí es donde empieza a valer
+ * dinero. Todo es editable desde la interfaz y se guarda en tu navegador.
+ *
+ * Unidades: m2 = metro cuadrado, m3 = metro cúbico, ml = metro lineal,
+ * ud = unidad, gl = global (partida alzada).
+ */
+
+const UNIDADES = ["m2", "m3", "ml", "ud", "gl", "kg", "qq", "día"];
+
+const CATALOGO = [
+  // ── Preliminares ────────────────────────────────────────────────────────
+  { codigo: "PRE-01", categoria: "Preliminares", descripcion: "Limpieza y desmonte de terreno", unidad: "m2", costoMaterial: 0.00, costoManoObra: 1.20, desperdicio: 0 },
+  { codigo: "PRE-02", categoria: "Preliminares", descripcion: "Replanteo y trazado de obra", unidad: "m2", costoMaterial: 0.45, costoManoObra: 1.10, desperdicio: 0.05 },
+  { codigo: "PRE-03", categoria: "Preliminares", descripcion: "Demolición de mampostería existente", unidad: "m2", costoMaterial: 0.00, costoManoObra: 6.50, desperdicio: 0 },
+  { codigo: "PRE-04", categoria: "Preliminares", descripcion: "Bote de escombros (incluye transporte)", unidad: "m3", costoMaterial: 0.00, costoManoObra: 14.00, desperdicio: 0 },
+  { codigo: "PRE-05", categoria: "Preliminares", descripcion: "Caseta provisional y almacén de obra", unidad: "gl", costoMaterial: 280.00, costoManoObra: 120.00, desperdicio: 0 },
+
+  // ── Movimiento de tierra ────────────────────────────────────────────────
+  { codigo: "MOV-01", categoria: "Movimiento de tierra", descripcion: "Excavación manual en material común", unidad: "m3", costoMaterial: 0.00, costoManoObra: 17.00, desperdicio: 0 },
+  { codigo: "MOV-02", categoria: "Movimiento de tierra", descripcion: "Excavación con retroexcavadora", unidad: "m3", costoMaterial: 0.00, costoManoObra: 5.50, desperdicio: 0 },
+  { codigo: "MOV-03", categoria: "Movimiento de tierra", descripcion: "Relleno compactado con material selecto", unidad: "m3", costoMaterial: 16.00, costoManoObra: 8.00, desperdicio: 0.10 },
+
+  // ── Hormigón y acero ────────────────────────────────────────────────────
+  { codigo: "HOR-01", categoria: "Hormigón y acero", descripcion: "Hormigón 210 kg/cm² en zapatas", unidad: "m3", costoMaterial: 138.00, costoManoObra: 46.00, desperdicio: 0.05 },
+  { codigo: "HOR-02", categoria: "Hormigón y acero", descripcion: "Hormigón 210 kg/cm² en columnas", unidad: "m3", costoMaterial: 142.00, costoManoObra: 62.00, desperdicio: 0.05 },
+  { codigo: "HOR-03", categoria: "Hormigón y acero", descripcion: "Hormigón 210 kg/cm² en vigas", unidad: "m3", costoMaterial: 142.00, costoManoObra: 58.00, desperdicio: 0.05 },
+  { codigo: "HOR-04", categoria: "Hormigón y acero", descripcion: "Losa de entrepiso maciza e=12cm", unidad: "m2", costoMaterial: 31.00, costoManoObra: 16.00, desperdicio: 0.05 },
+  { codigo: "HOR-05", categoria: "Hormigón y acero", descripcion: "Acero de refuerzo grado 60 (habilitado y colocado)", unidad: "kg", costoMaterial: 1.15, costoManoObra: 0.45, desperdicio: 0.07 },
+  { codigo: "HOR-06", categoria: "Hormigón y acero", descripcion: "Encofrado de madera en columnas y vigas", unidad: "m2", costoMaterial: 6.80, costoManoObra: 7.50, desperdicio: 0.15 },
+  { codigo: "HOR-07", categoria: "Hormigón y acero", descripcion: "Contrapiso de hormigón e=10cm", unidad: "m2", costoMaterial: 13.50, costoManoObra: 6.00, desperdicio: 0.05 },
+
+  // ── Mampostería ─────────────────────────────────────────────────────────
+  { codigo: "MAM-01", categoria: "Mampostería", descripcion: 'Muro de bloque de hormigón 4"', unidad: "m2", costoMaterial: 11.50, costoManoObra: 6.50, desperdicio: 0.05 },
+  { codigo: "MAM-02", categoria: "Mampostería", descripcion: 'Muro de bloque de hormigón 6"', unidad: "m2", costoMaterial: 14.20, costoManoObra: 7.20, desperdicio: 0.05 },
+  { codigo: "MAM-03", categoria: "Mampostería", descripcion: 'Muro de bloque de hormigón 8"', unidad: "m2", costoMaterial: 17.80, costoManoObra: 8.00, desperdicio: 0.05 },
+  { codigo: "MAM-04", categoria: "Mampostería", descripcion: "Muro divisorio en drywall (una cara)", unidad: "m2", costoMaterial: 12.00, costoManoObra: 9.50, desperdicio: 0.10 },
+
+  // ── Revestimientos ──────────────────────────────────────────────────────
+  { codigo: "REV-01", categoria: "Revestimientos", descripcion: "Pañete/repello interior", unidad: "m2", costoMaterial: 3.40, costoManoObra: 4.60, desperdicio: 0.10 },
+  { codigo: "REV-02", categoria: "Revestimientos", descripcion: "Pañete/repello exterior", unidad: "m2", costoMaterial: 3.80, costoManoObra: 5.60, desperdicio: 0.10 },
+  { codigo: "REV-03", categoria: "Revestimientos", descripcion: "Cantos y filos en vanos", unidad: "ml", costoMaterial: 1.20, costoManoObra: 2.80, desperdicio: 0.08 },
+  { codigo: "REV-04", categoria: "Revestimientos", descripcion: "Cerámica en pared de baño/cocina", unidad: "m2", costoMaterial: 16.00, costoManoObra: 11.00, desperdicio: 0.10 },
+
+  // ── Pisos ───────────────────────────────────────────────────────────────
+  { codigo: "PIS-01", categoria: "Pisos", descripcion: "Piso de cerámica nacional 45x45", unidad: "m2", costoMaterial: 15.00, costoManoObra: 8.50, desperdicio: 0.08 },
+  { codigo: "PIS-02", categoria: "Pisos", descripcion: "Piso de porcelanato 60x60", unidad: "m2", costoMaterial: 27.00, costoManoObra: 11.00, desperdicio: 0.08 },
+  { codigo: "PIS-03", categoria: "Pisos", descripcion: "Zócalo/rodapié cerámico", unidad: "ml", costoMaterial: 3.20, costoManoObra: 2.60, desperdicio: 0.08 },
+  { codigo: "PIS-04", categoria: "Pisos", descripcion: "Pulido y brillado de piso de hormigón", unidad: "m2", costoMaterial: 3.50, costoManoObra: 6.00, desperdicio: 0.05 },
+
+  // ── Techo e impermeabilización ──────────────────────────────────────────
+  { codigo: "TEC-01", categoria: "Techo", descripcion: "Impermeabilización asfáltica en losa", unidad: "m2", costoMaterial: 8.50, costoManoObra: 4.50, desperdicio: 0.10 },
+  { codigo: "TEC-02", categoria: "Techo", descripcion: "Techo de zinc calibre 26 sobre estructura metálica", unidad: "m2", costoMaterial: 21.00, costoManoObra: 12.00, desperdicio: 0.10 },
+  { codigo: "TEC-03", categoria: "Techo", descripcion: "Cielo raso en PVC", unidad: "m2", costoMaterial: 14.00, costoManoObra: 9.00, desperdicio: 0.08 },
+
+  // ── Instalación eléctrica ───────────────────────────────────────────────
+  { codigo: "ELE-01", categoria: "Eléctrica", descripcion: "Punto eléctrico de iluminación", unidad: "ud", costoMaterial: 13.50, costoManoObra: 12.00, desperdicio: 0.05 },
+  { codigo: "ELE-02", categoria: "Eléctrica", descripcion: "Punto eléctrico de tomacorriente 110V", unidad: "ud", costoMaterial: 15.00, costoManoObra: 12.00, desperdicio: 0.05 },
+  { codigo: "ELE-03", categoria: "Eléctrica", descripcion: "Punto especial 220V (estufa/aire)", unidad: "ud", costoMaterial: 38.00, costoManoObra: 26.00, desperdicio: 0.05 },
+  { codigo: "ELE-04", categoria: "Eléctrica", descripcion: "Panel de breakers 8 espacios instalado", unidad: "ud", costoMaterial: 145.00, costoManoObra: 85.00, desperdicio: 0 },
+  { codigo: "ELE-05", categoria: "Eléctrica", descripcion: "Acometida eléctrica desde medidor", unidad: "gl", costoMaterial: 210.00, costoManoObra: 140.00, desperdicio: 0.05 },
+
+  // ── Instalación sanitaria ───────────────────────────────────────────────
+  { codigo: "SAN-01", categoria: "Sanitaria", descripcion: "Punto de agua potable 1/2\"", unidad: "ud", costoMaterial: 17.00, costoManoObra: 16.00, desperdicio: 0.08 },
+  { codigo: "SAN-02", categoria: "Sanitaria", descripcion: "Punto de drenaje sanitario 2\"-4\"", unidad: "ud", costoMaterial: 24.00, costoManoObra: 20.00, desperdicio: 0.08 },
+  { codigo: "SAN-03", categoria: "Sanitaria", descripcion: "Instalación de inodoro (pieza no incluida)", unidad: "ud", costoMaterial: 18.00, costoManoObra: 30.00, desperdicio: 0 },
+  { codigo: "SAN-04", categoria: "Sanitaria", descripcion: "Instalación de lavamanos (pieza no incluida)", unidad: "ud", costoMaterial: 15.00, costoManoObra: 26.00, desperdicio: 0 },
+  { codigo: "SAN-05", categoria: "Sanitaria", descripcion: "Registro/caja de inspección sanitaria", unidad: "ud", costoMaterial: 45.00, costoManoObra: 38.00, desperdicio: 0.05 },
+
+  // ── Pintura ─────────────────────────────────────────────────────────────
+  { codigo: "PIN-01", categoria: "Pintura", descripcion: "Pintura acrílica interior (2 manos + sellador)", unidad: "m2", costoMaterial: 2.30, costoManoObra: 2.70, desperdicio: 0.08 },
+  { codigo: "PIN-02", categoria: "Pintura", descripcion: "Pintura acrílica exterior (2 manos + sellador)", unidad: "m2", costoMaterial: 2.90, costoManoObra: 3.30, desperdicio: 0.08 },
+  { codigo: "PIN-03", categoria: "Pintura", descripcion: "Masillado y lijado de paredes", unidad: "m2", costoMaterial: 1.60, costoManoObra: 3.10, desperdicio: 0.10 },
+
+  // ── Carpintería y aluminio ──────────────────────────────────────────────
+  { codigo: "CAR-01", categoria: "Carpintería", descripcion: "Puerta de madera interior con marco y herrajes", unidad: "ud", costoMaterial: 155.00, costoManoObra: 45.00, desperdicio: 0 },
+  { codigo: "CAR-02", categoria: "Carpintería", descripcion: "Puerta principal metálica con marco", unidad: "ud", costoMaterial: 290.00, costoManoObra: 60.00, desperdicio: 0 },
+  { codigo: "CAR-03", categoria: "Carpintería", descripcion: "Ventana de aluminio y vidrio corrediza", unidad: "m2", costoMaterial: 105.00, costoManoObra: 28.00, desperdicio: 0.05 },
+  { codigo: "CAR-04", categoria: "Carpintería", descripcion: "Mueble de cocina bajo (melamina)", unidad: "ml", costoMaterial: 195.00, costoManoObra: 55.00, desperdicio: 0.05 },
+
+  // ── Limpieza final ──────────────────────────────────────────────────────
+  { codigo: "FIN-01", categoria: "Entrega", descripcion: "Limpieza fina y entrega de obra", unidad: "m2", costoMaterial: 0.60, costoManoObra: 1.90, desperdicio: 0 },
+];
+
+/** Categorías en el orden natural de ejecución de una obra. */
+function categorias(catalogo = CATALOGO) {
+  const vistas = [];
+  for (const p of catalogo) {
+    if (!vistas.includes(p.categoria)) vistas.push(p.categoria);
+  }
+  return vistas;
+}
+
+/**
+ * Búsqueda tolerante: ignora acentos y mayúsculas, y trata cada palabra por
+ * separado.
+ *
+ * Lo de las palabras sueltas importa más de lo que parece. Nadie escribe
+ * 'Muro de bloque de hormigón 6"'; escriben "bloque 6". Exigir que el texto
+ * completo aparezca contiguo devuelve cero resultados justo en la consulta
+ * más natural, y el usuario concluye que la partida no existe.
+ */
+function buscar(termino, catalogo = CATALOGO) {
+  const palabras = normalizar(termino).split(/\s+/).filter(Boolean);
+  if (!palabras.length) return catalogo;
+
+  return catalogo.filter((p) => {
+    const heno = `${normalizar(p.codigo)} ${normalizar(p.descripcion)} ${normalizar(p.categoria)}`;
+    return palabras.every((w) => heno.includes(w));
+  });
+}
+
+function normalizar(texto = "") {
+  return String(texto)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+
+/* ═══════ src/storage.js ═══════ */
+/**
+ * Persistencia local. Sin servidor, sin cuentas, sin internet.
+ *
+ * Todo vive en localStorage del navegador del contratista. Eso significa:
+ *  - Funciona en el celular parado en medio de la obra, sin señal.
+ *  - Nadie más ve tus costos. Tus precios de ferretería son tu ventaja
+ *    competitiva; no tienen por qué estar en el servidor de nadie.
+ *  - Si borras los datos del navegador, se van. Por eso existe exportar().
+ */
+
+const CLAVE = "ashanny.cotizador.v1";
+
+const ESTADO_INICIAL = {
+  empresa: {
+    // Vacío a propósito: dispara que se abra el panel de empresa en el primer
+    // uso. Un valor por defecto aquí hace que la primera propuesta salga
+    // encabezada con el nombre de otro.
+    nombre: "",
+    rnc: "",
+    telefono: "",
+    correo: "",
+    direccion: "",
+    logo: "", // dataURL opcional
+  },
+  config: null,      // null => usa CONFIG_POR_DEFECTO
+  catalogo: null,    // null => usa CATALOGO base
+  cotizaciones: [],
+};
+
+function almacen() {
+  try {
+    if (typeof localStorage === "undefined") return null;
+    // Safari en modo privado deja el objeto pero revienta al escribir.
+    const prueba = "__probe__";
+    localStorage.setItem(prueba, "1");
+    localStorage.removeItem(prueba);
+    return localStorage;
+  } catch {
+    return null;
+  }
+}
+
+// Respaldo en memoria: si el navegador bloquea localStorage, la app sigue
+// usable durante la sesión en vez de romperse a media cotización.
+let memoria = null;
+
+function cargar() {
+  const s = almacen();
+  if (!s) return memoria ? clonar(memoria) : clonar(ESTADO_INICIAL);
+  try {
+    const crudo = s.getItem(CLAVE);
+    if (!crudo) return clonar(ESTADO_INICIAL);
+    const datos = JSON.parse(crudo);
+    return { ...clonar(ESTADO_INICIAL), ...datos };
+  } catch {
+    // Datos corruptos: mejor arrancar limpio que dejar la app muerta.
+    return clonar(ESTADO_INICIAL);
+  }
+}
+
+function guardar(estado) {
+  memoria = clonar(estado);
+  const s = almacen();
+  if (!s) return { ok: false, motivo: "sin-almacenamiento" };
+  try {
+    s.setItem(CLAVE, JSON.stringify(estado));
+    return { ok: true };
+  } catch (e) {
+    // Cuota llena: casi siempre por logos en base64 acumulados.
+    return { ok: false, motivo: "cuota", error: String(e) };
+  }
+}
+
+function exportar(estado) {
+  return JSON.stringify({ formato: CLAVE, exportado: new Date().toISOString(), datos: estado }, null, 2);
+}
+
+function importar(texto) {
+  const parseado = JSON.parse(texto);
+  const datos = parseado?.datos ?? parseado;
+  if (!datos || typeof datos !== "object") {
+    throw new Error("El archivo no tiene el formato esperado.");
+  }
+  return { ...clonar(ESTADO_INICIAL), ...datos };
+}
+
+/** Número correlativo por año: COT-2026-001 */
+function siguienteNumero(cotizaciones = [], anio = new Date().getFullYear()) {
+  const prefijo = `COT-${anio}-`;
+  const usados = cotizaciones
+    .map((c) => c?.numero)
+    .filter((n) => typeof n === "string" && n.startsWith(prefijo))
+    .map((n) => parseInt(n.slice(prefijo.length), 10))
+    .filter(Number.isFinite);
+  const siguiente = usados.length ? Math.max(...usados) + 1 : 1;
+  return `${prefijo}${String(siguiente).padStart(3, "0")}`;
+}
+
+function clonar(o) {
+  return JSON.parse(JSON.stringify(o));
+}
+
+
+
+
+/* ═══════ src/ui.js ═══════ */
+/**
+ * Interfaz del cotizador. Toda la matemática vive en calc.js; aquí solo se
+ * captura, se pinta y se imprime.
+ */
+
+
+
+
+
+const $ = (sel, raiz = document) => raiz.querySelector(sel);
+const $$ = (sel, raiz = document) => [...raiz.querySelectorAll(sel)];
+
+let estado = cargar();
+let catalogo = estado.catalogo?.length ? estado.catalogo : CATALOGO;
+
+// La cotización que se está editando ahora mismo.
+let actual = nuevaCotizacion();
+let indiceResaltado = -1;
+
+function nuevaCotizacion() {
+  return {
+    numero: siguienteNumero(estado.cotizaciones),
+    fecha: hoy(),
+    validez: 15,
+    cliente: "",
+    telefonoCliente: "",
+    obra: "",
+    ubicacion: "",
+    notas:
+      "• Precios sujetos a cambio después de la fecha de validez.\n" +
+      "• No incluye trabajos no especificados en esta propuesta.\n" +
+      "• Cualquier trabajo adicional se cotiza por separado antes de ejecutarse.",
+    partidas: [],
+    config: { ...CONFIG_POR_DEFECTO, ...(estado.config || {}) },
+  };
+}
+
+function hoy() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function fechaLarga(iso) {
+  const [a, m, d] = String(iso || "").split("-").map(Number);
+  if (!a || !m || !d) return iso || "";
+  try {
+    return new Date(a, m - 1, d).toLocaleDateString("es-DO", {
+      day: "numeric", month: "long", year: "numeric",
+    });
+  } catch {
+    return iso;
+  }
+}
+
+function escapar(texto = "") {
+  return String(texto).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+  );
+}
+
+/* ── Render ──────────────────────────────────────────────────────────── */
+
+function pintarEmpresa() {
+  for (const campo of ["nombre", "rnc", "telefono", "correo", "direccion"]) {
+    const el = $(`[data-empresa="${campo}"]`);
+    if (el) el.value = estado.empresa[campo] || "";
+  }
+  const logo = $("#vista-logo");
+  if (logo) {
+    logo.src = estado.empresa.logo || "";
+    logo.hidden = !estado.empresa.logo;
+  }
+}
+
+function pintarEncabezado() {
+  for (const campo of ["numero", "fecha", "validez", "cliente", "telefonoCliente", "obra", "ubicacion", "notas"]) {
+    const el = $(`[data-cot="${campo}"]`);
+    if (el && el.value !== String(actual[campo] ?? "")) el.value = actual[campo] ?? "";
+  }
+}
+
+function pintarConfig() {
+  const c = actual.config;
+  const pct = (v) => redondear(numero(v) * 100, 2);
+  const set = (nombre, valor) => {
+    const el = $(`[data-config="${nombre}"]`);
+    if (el && document.activeElement !== el) el.value = valor;
+  };
+  set("gastosGenerales", pct(c.gastosGenerales));
+  set("imprevistos", pct(c.imprevistos));
+  set("utilidad", pct(c.utilidad));
+  set("impuesto", pct(c.impuesto));
+  set("anticipo", pct(c.anticipo));
+  set("moneda", c.moneda);
+  const modo = $(`[data-config="modoUtilidad"]`);
+  if (modo) modo.value = c.modoUtilidad;
+  const incl = $(`[data-config="impuestoIncluido"]`);
+  if (incl) incl.checked = !!c.impuestoIncluido;
+}
+
+function pintarPartidas(q) {
+  const cuerpo = $("#cuerpo-partidas");
+  if (!actual.partidas.length) {
+    cuerpo.innerHTML = `<tr><td colspan="8" class="vacio">
+      Busca una partida arriba y presiona Enter, o agrega una línea en blanco.
+    </td></tr>`;
+    return;
+  }
+
+  cuerpo.innerHTML = actual.partidas
+    .map((p, i) => {
+      const l = q.lineas[i];
+      return `<tr data-fila="${i}">
+        <td class="col-desc">
+          <input data-p="descripcion" value="${escapar(p.descripcion)}" aria-label="Descripción línea ${i + 1}">
+        </td>
+        <td class="col-uni">
+          <select data-p="unidad" aria-label="Unidad línea ${i + 1}">
+            ${UNIDADES.map((u) => `<option${u === p.unidad ? " selected" : ""}>${u}</option>`).join("")}
+          </select>
+        </td>
+        <td class="col-num"><input type="number" step="any" min="0" data-p="cantidad" value="${p.cantidad}" aria-label="Cantidad línea ${i + 1}"></td>
+        <td class="col-num"><input type="number" step="any" min="0" data-p="costoMaterial" value="${p.costoMaterial}" aria-label="Material línea ${i + 1}"></td>
+        <td class="col-num"><input type="number" step="any" min="0" data-p="costoManoObra" value="${p.costoManoObra}" aria-label="Mano de obra línea ${i + 1}"></td>
+        <td class="col-num"><input type="number" step="any" min="0" max="100" data-p="desperdicioPct" value="${redondear(p.desperdicio * 100, 2)}" aria-label="Desperdicio % línea ${i + 1}"></td>
+        <td class="num">${formatearDinero(l.total, actual.config)}</td>
+        <td><button class="icono peligro" data-accion="borrar" aria-label="Eliminar línea ${i + 1}">✕</button></td>
+      </tr>`;
+    })
+    .join("");
+}
+
+function pintarTotales(q) {
+  const f = (v) => formatearDinero(v, actual.config);
+  const panel = $("#panel-totales");
+
+  const filas = [
+    ["Costo directo", f(q.costoDirecto)],
+    [`Gastos generales (${formatearPorcentaje(q.config.gastosGenerales)})`, f(q.gastosGenerales)],
+    [`Imprevistos (${formatearPorcentaje(q.config.imprevistos)})`, f(q.imprevistos)],
+  ];
+
+  panel.innerHTML =
+    filas.map(([k, v]) => `<div class="total-linea tenue"><span>${k}</span><span>${v}</span></div>`).join("") +
+    `<div class="total-linea separador"><span>Costo total (tu punto de equilibrio)</span><span>${f(q.costoTotal)}</span></div>
+     <div class="total-linea"><span>Utilidad</span><span>${f(q.utilidad)}</span></div>
+     <div class="total-linea tenue"><span>Margen real sobre la venta</span>
+       <span class="pastilla ${q.margenReal >= 0.15 ? "ok" : "mal"}">${formatearPorcentaje(q.margenReal)}</span></div>
+     <div class="total-linea separador"><span>Subtotal</span><span>${f(q.baseImponible)}</span></div>
+     <div class="total-linea tenue"><span>Impuesto (${formatearPorcentaje(q.config.impuesto)})</span><span>${f(q.impuesto)}</span></div>
+     <div class="total-linea grande separador"><span>TOTAL</span><span>${f(q.total)}</span></div>
+     <div class="total-linea tenue"><span>Anticipo (${formatearPorcentaje(q.config.anticipo)})</span><span>${f(q.anticipo)}</span></div>
+     <div class="total-linea tenue"><span>Saldo contra entrega</span><span>${f(q.saldo)}</span></div>`;
+
+  pintarAvisos(q);
+}
+
+/**
+ * Los avisos son la parte que más dinero salva: le dicen al contratista,
+ * en su propio número, cuándo está a punto de firmar una obra que pierde.
+ */
+function pintarAvisos(q) {
+  const caja = $("#avisos");
+  const avisos = [];
+  const f = (v) => formatearDinero(v, actual.config);
+
+  if (q.config.modoUtilidad === "markup" && q.costoTotal > 0) {
+    const c = compararMargenMarkup(q.costoTotal, q.config.utilidad);
+    avisos.push({
+      tipo: "",
+      titulo: `Estás usando markup: tu margen real es ${formatearPorcentaje(c.margenRealDelMarkup)}, no ${formatearPorcentaje(q.config.utilidad)}`,
+      texto: `Para ganar de verdad ${formatearPorcentaje(q.config.utilidad)} sobre la venta tendrías que cobrar ${f(c.precioMargen)} en vez de ${f(c.precioMarkup)}. Diferencia: <strong>${f(c.diferencia)}</strong> en esta sola cotización.`,
+    });
+  }
+
+  if (q.costoDirecto > 0 && q.margenReal < 0.10) {
+    avisos.push({
+      tipo: "malo",
+      titulo: "Margen peligrosamente bajo",
+      texto: `Con ${formatearPorcentaje(q.margenReal)} de margen, un atraso de una semana o una subida del cemento te deja trabajando gratis. Por debajo de ${f(q.puntoEquilibrio)} estás pagando por trabajar.`,
+    });
+  }
+
+  if (q.costoDirecto > 0 && numeroPositivo(q.config.imprevistos) === 0) {
+    avisos.push({
+      tipo: "",
+      titulo: "Sin partida de imprevistos",
+      texto: "En obra siempre aparece algo. Un 5% de contingencia es lo que separa una obra rentable de una discusión con el cliente.",
+    });
+  }
+
+  if (q.costoDirecto > 0 && numeroPositivo(q.config.anticipo) < 0.3) {
+    avisos.push({
+      tipo: "",
+      titulo: "Anticipo bajo",
+      texto: `Vas a financiar ${f(q.saldo)} de material con tu propio bolsillo. Lo estándar es 40–50% al firmar.`,
+    });
+  }
+
+  caja.innerHTML = avisos
+    .map((a) => `<div class="aviso ${a.tipo}"><strong>${a.titulo}</strong>${a.texto}</div>`)
+    .join("");
+}
+
+function pintarHistorial() {
+  const lista = $("#historial");
+  if (!estado.cotizaciones.length) {
+    lista.innerHTML = `<p class="vacio" style="padding:.6rem">Aún no has guardado ninguna cotización.</p>`;
+    return;
+  }
+  lista.innerHTML = [...estado.cotizaciones]
+    .reverse()
+    .map((c) => {
+      const i = estado.cotizaciones.indexOf(c);
+      return `<div class="total-linea" style="align-items:center">
+        <span>
+          <strong>${escapar(c.numero)}</strong><br>
+          <small style="color:var(--suave)">${escapar(c.cliente || "Sin cliente")} · ${escapar(c.fecha)}</small>
+        </span>
+        <span style="display:flex;gap:.3rem;align-items:center">
+          <button class="icono" data-abrir="${i}" title="Abrir">Abrir</button>
+          <button class="icono peligro" data-eliminar="${i}" title="Eliminar" aria-label="Eliminar ${escapar(c.numero)}">✕</button>
+        </span>
+      </div>`;
+    })
+    .join("");
+}
+
+function pintarDocumento(q) {
+  const e = estado.empresa;
+  const f = (v) => formatearDinero(v, actual.config);
+
+  const contacto = [e.telefono, e.correo, e.direccion, e.rnc ? `RNC: ${e.rnc}` : ""]
+    .filter(Boolean)
+    .map(escapar)
+    .join(" · ");
+
+  const filas = q.lineas
+    .map(
+      (l, i) => `<tr>
+      <td class="num">${i + 1}</td>
+      <td>${escapar(l.descripcion || "—")}</td>
+      <td>${escapar(l.unidad)}</td>
+      <td class="num">${numero(l.cantidad).toLocaleString("es-DO", { maximumFractionDigits: 2 })}</td>
+      <td class="num">${f(l.costoUnitarioVenta)}</td>
+      <td class="num">${f(l.totalVenta)}</td>
+    </tr>`
+    )
+    .join("");
+
+  $("#documento").innerHTML = `
+    <div class="doc-cabecera">
+      <div>
+        ${e.logo ? `<img src="${escapar(e.logo)}" alt="">` : ""}
+        <h2 style="margin:.3rem 0 .1rem">${escapar(e.nombre || "Mi Constructora")}</h2>
+        <div class="doc-nota">${contacto}</div>
+      </div>
+      <div class="doc-titulo">
+        <h2>COTIZACIÓN</h2>
+        <div><strong>${escapar(actual.numero)}</strong></div>
+        <div class="doc-nota">Fecha: ${fechaLarga(actual.fecha)}<br>
+        Válida por ${numeroPositivo(actual.validez, 15)} días</div>
+      </div>
+    </div>
+
+    <div class="doc-partes">
+      <div>
+        <h3>Cliente</h3>
+        <div><strong>${escapar(actual.cliente || "—")}</strong></div>
+        <div class="doc-nota">${escapar(actual.telefonoCliente || "")}</div>
+      </div>
+      <div>
+        <h3>Obra</h3>
+        <div><strong>${escapar(actual.obra || "—")}</strong></div>
+        <div class="doc-nota">${escapar(actual.ubicacion || "")}</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th class="num">#</th><th>Descripción</th><th>Ud.</th>
+          <th class="num">Cant.</th><th class="num">P. unitario</th><th class="num">Importe</th>
+        </tr>
+      </thead>
+      <tbody>${filas || `<tr><td colspan="6">Sin partidas.</td></tr>`}</tbody>
+      <tfoot>
+        <tr><td colspan="5" class="num">Subtotal</td><td class="num">${f(q.baseImponible)}</td></tr>
+        ${
+          q.impuesto > 0
+            ? `<tr><td colspan="5" class="num">Impuesto (${formatearPorcentaje(q.config.impuesto)})</td><td class="num">${f(q.impuesto)}</td></tr>`
+            : ""
+        }
+        <tr class="doc-total"><td colspan="5" class="num">TOTAL</td><td class="num">${f(q.total)}</td></tr>
+      </tfoot>
+    </table>
+
+    <div style="margin-top:1rem">
+      <h3>Forma de pago</h3>
+      <div class="doc-nota">Anticipo al firmar (${formatearPorcentaje(q.config.anticipo)}): <strong>${f(q.anticipo)}</strong>
+      · Saldo contra entrega: <strong>${f(q.saldo)}</strong></div>
+    </div>
+
+    ${
+      actual.notas
+        ? `<div style="margin-top:1rem"><h3>Condiciones</h3><div class="doc-nota">${escapar(actual.notas)}</div></div>`
+        : ""
+    }
+
+    <div class="doc-firmas">
+      <div>${escapar(e.nombre || "Por la empresa")}</div>
+      <div>Aceptado por el cliente</div>
+    </div>`;
+}
+
+/**
+ * El cliente NUNCA debe ver el desglose de costo y utilidad. Lo que ve es un
+ * precio unitario de venta que ya lleva todo adentro. Se reparte el margen
+ * proporcionalmente entre las líneas, y se ajusta el último centavo en la
+ * partida mayor para que la columna cuadre con el subtotal exacto.
+ */
+function conPreciosDeVenta(q) {
+  const factor = q.costoDirecto > 0 ? q.baseImponible / q.costoDirecto : 0;
+
+  const lineas = q.lineas.map((l) => {
+    const totalVenta = redondear(l.total * factor);
+    const cant = numeroPositivo(l.cantidad);
+    return {
+      ...l,
+      totalVenta,
+      costoUnitarioVenta: cant > 0 ? redondear(totalVenta / cant) : 0,
+    };
+  });
+
+  const suma = redondear(lineas.reduce((a, l) => a + l.totalVenta, 0));
+  const desfase = redondear(q.baseImponible - suma);
+  if (desfase !== 0 && lineas.length) {
+    // Se absorbe en la partida de mayor importe: es donde menos se nota.
+    let mayor = 0;
+    lineas.forEach((l, i) => { if (l.totalVenta > lineas[mayor].totalVenta) mayor = i; });
+    lineas[mayor] = { ...lineas[mayor], totalVenta: redondear(lineas[mayor].totalVenta + desfase) };
+    const c = numeroPositivo(lineas[mayor].cantidad);
+    if (c > 0) lineas[mayor].costoUnitarioVenta = redondear(lineas[mayor].totalVenta / c);
+  }
+
+  return { ...q, lineas };
+}
+
+function render() {
+  let q;
+  try {
+    q = calcularCotizacion(actual.partidas, actual.config);
+    $("#error-config").hidden = true;
+  } catch (e) {
+    $("#error-config").hidden = false;
+    $("#error-config").textContent = e.message;
+    // Se recalcula con un margen seguro para no dejar la pantalla en blanco.
+    q = calcularCotizacion(actual.partidas, { ...actual.config, utilidad: 0 });
+  }
+
+  pintarEmpresa();
+  pintarEncabezado();
+  pintarConfig();
+  pintarPartidas(q);
+  pintarTotales(q);
+  pintarHistorial();
+  pintarDocumento(conPreciosDeVenta(q));
+  return q;
+}
+
+/* ── Eventos ─────────────────────────────────────────────────────────── */
+
+function avisar(texto) {
+  const el = $("#aviso-flotante");
+  el.textContent = texto;
+  el.classList.add("visible");
+  clearTimeout(avisar._t);
+  avisar._t = setTimeout(() => el.classList.remove("visible"), 2200);
+}
+
+function persistir() {
+  const r = guardar(estado);
+  if (!r.ok && r.motivo === "cuota") {
+    avisar("Almacenamiento lleno: exporta y borra cotizaciones viejas.");
+  }
+}
+
+function agregarPartida(base = {}) {
+  actual.partidas.push({
+    codigo: base.codigo || "",
+    descripcion: base.descripcion || "",
+    unidad: base.unidad || "ud",
+    cantidad: base.cantidad ?? 1,
+    costoMaterial: base.costoMaterial ?? 0,
+    costoManoObra: base.costoManoObra ?? 0,
+    desperdicio: base.desperdicio ?? 0,
+  });
+  render();
+}
+
+function pintarResultados(termino) {
+  const caja = $("#resultados");
+  const encontrados = termino.trim() ? buscar(termino, catalogo).slice(0, 40) : [];
+  indiceResaltado = encontrados.length ? 0 : -1;
+
+  if (!encontrados.length) {
+    caja.hidden = true;
+    caja.innerHTML = "";
+    return [];
+  }
+
+  caja.hidden = false;
+  caja.innerHTML = `<ul role="listbox">${encontrados
+    .map(
+      (p, i) => `<li role="option" data-idx="${i}" aria-selected="${i === 0}">
+        <span class="codigo">${escapar(p.codigo)}</span>
+        <span>${escapar(p.descripcion)}</span>
+        <span class="precio">${formatearDinero(
+          numeroPositivo(p.costoMaterial) * (1 + numeroPositivo(p.desperdicio)) + numeroPositivo(p.costoManoObra),
+          actual.config
+        )}/${escapar(p.unidad)}</span>
+      </li>`
+    )
+    .join("")}</ul>`;
+  return encontrados;
+}
+
+function conectar() {
+  // — Buscador del catálogo —
+  const entrada = $("#buscar");
+  let encontrados = [];
+
+  entrada.addEventListener("input", () => {
+    encontrados = pintarResultados(entrada.value);
+  });
+
+  entrada.addEventListener("keydown", (ev) => {
+    if (!encontrados.length) return;
+    if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+      ev.preventDefault();
+      const paso = ev.key === "ArrowDown" ? 1 : -1;
+      indiceResaltado = (indiceResaltado + paso + encontrados.length) % encontrados.length;
+      $$("#resultados li").forEach((li, i) =>
+        li.setAttribute("aria-selected", String(i === indiceResaltado))
+      );
+      $$("#resultados li")[indiceResaltado]?.scrollIntoView({ block: "nearest" });
+    } else if (ev.key === "Enter" && indiceResaltado >= 0) {
+      ev.preventDefault();
+      agregarPartida(encontrados[indiceResaltado]);
+      entrada.value = "";
+      encontrados = pintarResultados("");
+      entrada.focus();
+    } else if (ev.key === "Escape") {
+      entrada.value = "";
+      encontrados = pintarResultados("");
+    }
+  });
+
+  $("#resultados").addEventListener("mousedown", (ev) => {
+    const li = ev.target.closest("li[data-idx]");
+    if (!li) return;
+    ev.preventDefault();
+    agregarPartida(encontrados[Number(li.dataset.idx)]);
+    entrada.value = "";
+    encontrados = pintarResultados("");
+    entrada.focus();
+  });
+
+  document.addEventListener("click", (ev) => {
+    if (!ev.target.closest(".buscador")) $("#resultados").hidden = true;
+  });
+
+  // — Edición de la tabla (delegada: las filas se repintan constantemente) —
+  $("#cuerpo-partidas").addEventListener("input", (ev) => {
+    const campo = ev.target.dataset.p;
+    if (!campo) return;
+    const fila = Number(ev.target.closest("tr").dataset.fila);
+    const p = actual.partidas[fila];
+    if (!p) return;
+
+    if (campo === "descripcion" || campo === "unidad") {
+      p[campo] = ev.target.value;
+      // No se repinta la tabla: perdería el cursor a media palabra.
+      const q = calcularCotizacion(actual.partidas, actual.config);
+      pintarTotales(q);
+      pintarDocumento(conPreciosDeVenta(q));
+      return;
+    }
+
+    if (campo === "desperdicioPct") {
+      p.desperdicio = numeroPositivo(ev.target.value) / 100;
+    } else {
+      p[campo] = numeroPositivo(ev.target.value);
+    }
+
+    // Se actualiza el importe de la fila sin reconstruir el <input> activo.
+    const q = calcularCotizacion(actual.partidas, actual.config);
+    const celda = ev.target.closest("tr").querySelector("td.num");
+    if (celda) celda.textContent = formatearDinero(q.lineas[fila].total, actual.config);
+    pintarTotales(q);
+    pintarDocumento(conPreciosDeVenta(q));
+  });
+
+  $("#cuerpo-partidas").addEventListener("click", (ev) => {
+    if (ev.target.dataset.accion !== "borrar") return;
+    const fila = Number(ev.target.closest("tr").dataset.fila);
+    actual.partidas.splice(fila, 1);
+    render();
+  });
+
+  $("#agregar-linea").addEventListener("click", () => agregarPartida());
+
+  // — Encabezado de la cotización —
+  document.addEventListener("input", (ev) => {
+    const campo = ev.target.dataset.cot;
+    if (!campo) return;
+    actual[campo] = campo === "validez" ? numeroPositivo(ev.target.value) : ev.target.value;
+    pintarDocumento(conPreciosDeVenta(calcularCotizacion(actual.partidas, actual.config)));
+  });
+
+  // — Datos de la empresa —
+  document.addEventListener("input", (ev) => {
+    const campo = ev.target.dataset.empresa;
+    if (!campo) return;
+    estado.empresa[campo] = ev.target.value;
+    persistir();
+    pintarDocumento(conPreciosDeVenta(calcularCotizacion(actual.partidas, actual.config)));
+  });
+
+  $("#logo").addEventListener("change", (ev) => {
+    const archivo = ev.target.files?.[0];
+    if (!archivo) return;
+    if (archivo.size > 400 * 1024) {
+      avisar("El logo debe pesar menos de 400 KB.");
+      ev.target.value = "";
+      return;
+    }
+    const lector = new FileReader();
+    lector.onload = () => {
+      estado.empresa.logo = String(lector.result);
+      persistir();
+      render();
+      avisar("Logo actualizado.");
+    };
+    lector.readAsDataURL(archivo);
+  });
+
+  $("#quitar-logo").addEventListener("click", () => {
+    estado.empresa.logo = "";
+    persistir();
+    render();
+  });
+
+  // — Configuración de precios —
+  document.addEventListener("input", (ev) => {
+    const campo = ev.target.dataset.config;
+    if (!campo) return;
+    if (campo === "moneda") {
+      actual.config.moneda = ev.target.value.toUpperCase().slice(0, 3) || "USD";
+    } else if (campo === "modoUtilidad") {
+      actual.config.modoUtilidad = ev.target.value;
+    } else if (campo === "impuestoIncluido") {
+      actual.config.impuestoIncluido = ev.target.checked;
+    } else {
+      actual.config[campo] = numeroPositivo(ev.target.value) / 100;
+    }
+    // Estos porcentajes son de la empresa, no de una cotización suelta.
+    estado.config = { ...actual.config };
+    persistir();
+    render();
+  });
+
+  document.addEventListener("change", (ev) => {
+    if (ev.target.dataset.config) {
+      ev.target.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  });
+
+  // — Acciones principales —
+  $("#nueva").addEventListener("click", () => {
+    if (actual.partidas.length && !confirm("¿Descartar la cotización actual y empezar una nueva?")) return;
+    actual = nuevaCotizacion();
+    render();
+    avisar("Cotización nueva.");
+  });
+
+  $("#guardar").addEventListener("click", () => {
+    if (!actual.partidas.length) return avisar("Agrega al menos una partida.");
+    const q = calcularCotizacion(actual.partidas, actual.config);
+    const registro = { ...structuredClone(actual), total: q.total, guardada: new Date().toISOString() };
+    const i = estado.cotizaciones.findIndex((c) => c.numero === actual.numero);
+    if (i >= 0) estado.cotizaciones[i] = registro;
+    else estado.cotizaciones.push(registro);
+    persistir();
+    render();
+    avisar(`${actual.numero} guardada.`);
+  });
+
+  $("#imprimir").addEventListener("click", () => {
+    if (!actual.partidas.length) return avisar("Agrega al menos una partida.");
+    render();
+    window.print();
+  });
+
+  $("#historial").addEventListener("click", (ev) => {
+    const abrir = ev.target.dataset.abrir;
+    const eliminar = ev.target.dataset.eliminar;
+    if (abrir !== undefined) {
+      const c = estado.cotizaciones[Number(abrir)];
+      if (!c) return;
+      actual = { ...nuevaCotizacion(), ...structuredClone(c) };
+      render();
+      avisar(`${actual.numero} abierta.`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    if (eliminar !== undefined) {
+      const c = estado.cotizaciones[Number(eliminar)];
+      if (c && confirm(`¿Eliminar ${c.numero}? No se puede deshacer.`)) {
+        estado.cotizaciones.splice(Number(eliminar), 1);
+        persistir();
+        render();
+      }
+    }
+  });
+
+  $("#exportar").addEventListener("click", () => {
+    const blob = new Blob([exportar(estado)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `respaldo-cotizador-${hoy()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    avisar("Respaldo descargado. Guárdalo en tu correo o Drive.");
+  });
+
+  $("#importar").addEventListener("change", (ev) => {
+    const archivo = ev.target.files?.[0];
+    if (!archivo) return;
+    const lector = new FileReader();
+    lector.onload = () => {
+      try {
+        estado = importar(String(lector.result));
+        catalogo = estado.catalogo?.length ? estado.catalogo : CATALOGO;
+        actual = nuevaCotizacion();
+        persistir();
+        render();
+        avisar("Respaldo restaurado.");
+      } catch (e) {
+        alert(`No se pudo leer el archivo: ${e.message}`);
+      }
+    };
+    lector.readAsText(archivo);
+    ev.target.value = "";
+  });
+
+  // Ctrl/Cmd+S guarda, como en cualquier programa de escritorio.
+  document.addEventListener("keydown", (ev) => {
+    if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === "s") {
+      ev.preventDefault();
+      $("#guardar").click();
+    }
+  });
+
+  window.addEventListener("beforeunload", (ev) => {
+    if (!actual.partidas.length) return;
+    const guardada = estado.cotizaciones.find((c) => c.numero === actual.numero);
+    if (!guardada || guardada.total === undefined) {
+      ev.preventDefault();
+      ev.returnValue = "";
+    }
+  });
+}
+
+function iniciar() {
+  conectar();
+  render();
+
+  // El nombre de la empresa es lo que encabeza la cotización impresa. Si aún
+  // no está puesto, el panel se abre solo: si no, el contratista manda su
+  // primera propuesta encabezada con "Mi Constructora" y no entiende por qué.
+  const panelEmpresa = $("#tarjeta-empresa");
+  if (panelEmpresa) panelEmpresa.open = !estado.empresa.nombre;
+}
+
+if (typeof document !== "undefined") {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", iniciar);
+  } else {
+    iniciar();
+  }
+}
+
+})();
+</script>
+</body>
+</html>
