@@ -1,12 +1,16 @@
 # 02 — Anuncios Listos para Copiar y Pegar
 
-**Instrucción:** copia el texto tal cual. Solo reemplaza lo que está en `[CORCHETES]`.
+**Instrucción:** copia el texto tal cual y publícalo.
 No los "mejores" ni los adornes. Están escritos así a propósito.
 
-Datos que tienes que poner una sola vez y ya:
-- `[TU NOMBRE]` → tu nombre o el de la constructora
-- `[TU TELÉFONO]` → tu WhatsApp con formato 809-000-0000
-- `[TU ZONA]` → ej. Santo Domingo Este, Santiago, Bávaro
+Tu nombre (**César Lebrón**) y tu número (**809-419-0633**) ya están puestos
+en todos los textos. Lo único que queda entre `[CORCHETES]` es lo que cambia
+en cada caso: el nombre del cliente, la fecha, el sector del trabajo.
+
+> **Sobre la zona:** los textos dicen "toda la República Dominicana".
+> Funciona, pero un sector concreto convierte bastante mejor —
+> *"Atiendo Santo Domingo Este y alrededores"* le dice al vecino que llegas rápido.
+> Si decides enfocarte en una zona, cámbialo y avísame para actualizarte la página.
 
 ---
 
@@ -40,7 +44,7 @@ son por filtraciones en el techo.
 Un dato: sellarla ahora te cuesta RD$5,000.
 Esperar a que se pudra la loza te cuesta RD$60,000.
 
-Te reviso el techo sin compromiso. [TU TELÉFONO]
+Te reviso el techo sin compromiso. 809-419-0633
 ```
 
 ### Estado día 3
@@ -48,7 +52,7 @@ Te reviso el techo sin compromiso. [TU TELÉFONO]
 Pintar un cuarto: desde RD$9,000, todo incluido.
 Dos días y te lo entrego limpio.
 
-¿Tienes un cuarto que lleva años igual? Escríbeme. [TU TELÉFONO]
+¿Tienes un cuarto que lleva años igual? Escríbeme. 809-419-0633
 ```
 
 ### Estado día 4 (después del primer trabajo — el más importante)
@@ -59,7 +63,7 @@ Terminado hoy en [ZONA DEL TRABAJO]. ✅
 
 Gracias [NOMBRE DEL CLIENTE] por la confianza.
 
-¿Quién sigue? [TU TELÉFONO]
+¿Quién sigue? 809-419-0633
 ```
 
 > **Regla:** foto de ANTES y DESPUÉS de cada trabajo, siempre, desde el mismo ángulo.
@@ -88,7 +92,7 @@ y te digo qué cuesta, sin compromiso.
 
 ### Para exclientes o gente que ya te conoce trabajando
 ```
-[NOMBRE], saludos. Le escribe [TU NOMBRE], el que le hizo
+[NOMBRE], saludos. Le escribe César Lebrón, el que le hizo
 [EL TRABAJO QUE LE HICISTE].
 
 Estoy con agenda abierta esta semana y quería avisarle
@@ -120,12 +124,12 @@ Sello filtraciones, goteras y grietas. Trabajo garantizado.
 ✅ Impermeabilización completa de techo
 ✅ Material de primera, no parcho por parchar
 
-Atiendo [TU ZONA] y alrededores.
+Atiendo toda la República Dominicana.
 
 Mándame una foto del área por WhatsApp y te digo
 el precio el mismo día.
 
-📱 [TU TELÉFONO]
+📱 809-419-0633
 ```
 
 ### Anuncio 2 — Pintura
@@ -144,9 +148,9 @@ Pinto tu casa o apartamento. Precio cerrado, sin sorpresas.
 Presupuesto GRATIS. Me mandas las medidas o una foto
 y te doy el precio hoy mismo.
 
-Atiendo [TU ZONA].
+Atiendo toda la República Dominicana.
 
-📱 [TU TELÉFONO]
+📱 809-419-0633
 ```
 
 ### Anuncio 3 — Remodelación (el de mayor ticket)
@@ -167,7 +171,7 @@ Trabajo con anticipo del 50% y el resto a la entrega.
 Mándame fotos del espacio por WhatsApp y te preparo
 el presupuesto completo.
 
-📱 [TU TELÉFONO]
+📱 809-419-0633
 ```
 
 ---
@@ -180,7 +184,7 @@ Busca en Facebook: `[TU ZONA] compra y venta`, `Vecinos de [TU RESIDENCIAL]`,
 
 ### Versión 1 — la que mejor funciona (útil, no vendedora)
 ```
-Buenas, vecinos. Soy [TU NOMBRE], trabajo en construcción
+Buenas, vecinos. Soy César Lebrón, trabajo en construcción
 y remodelación aquí en [TU ZONA].
 
 Un consejo por si le sirve a alguien: con estas lluvias,
@@ -191,7 +195,7 @@ y la reparación se multiplica por 10.
 Si alguien quiere que le eche un ojo al techo sin compromiso,
 me escribe. No cobro la revisión.
 
-[TU TELÉFONO]
+809-419-0633
 ```
 
 ### Versión 2 — directa
@@ -203,7 +207,7 @@ Pintura • Filtraciones • Plomería • Cerámica • Resanes
 Presupuesto gratis, precio cerrado por escrito.
 Anticipo 50%, resto a la entrega.
 
-[TU TELÉFONO]
+809-419-0633
 ```
 
 ### Versión 3 — con prueba (úsala después del primer trabajo)
@@ -215,7 +219,7 @@ Trabajo entregado esta semana en [ZONA] ✅
 Pintura y resane de humedad. Dos días de trabajo.
 
 Si tienes algo parecido pendiente, escríbeme y te cotizo gratis.
-[TU TELÉFONO]
+809-419-0633
 ```
 
 ---
@@ -243,7 +247,7 @@ en un residencial. Es el canal con mejor retorno para trabajo local en RD.
 │   ¿SE TE ESTÁ FILTRANDO EL TECHO?          │
 │   ¿TIENES ESE ARREGLO PENDIENTE?           │
 │                                            │
-│   [TU NOMBRE] — Construcción y Remodelación│
+│   César Lebrón — Construcción y Remodelación│
 │                                            │
 │   ✓ Filtraciones y goteras                 │
 │   ✓ Pintura de interiores                  │
@@ -256,8 +260,8 @@ en un residencial. Es el canal con mejor retorno para trabajo local en RD.
 │   Precio cerrado por escrito.              │
 │   Sin sorpresas al final.                  │
 │                                            │
-│   📱 [TU TELÉFONO]                          │
-│   Atiendo [TU ZONA] y alrededores          │
+│   📱 809-419-0633                          │
+│   Atiendo toda la República Dominicana          │
 │                                            │
 └────────────────────────────────────────────┘
 ```

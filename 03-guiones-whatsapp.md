@@ -148,7 +148,7 @@ Para agendarle el día y comprar el material, el anticipo
 es de RD$[50%]. Me lo puede pasar por transferencia
 o efectivo, como le quede mejor.
 
-Cuenta: [TU BANCO] – [TU CUENTA] – a nombre de [TU NOMBRE]
+Cuenta: [TU BANCO] – [TU CUENTA] – a nombre de César Lebrón
 
 Apenas lo reciba le confirmo y compro el material mañana temprano.
 ```

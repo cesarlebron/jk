@@ -14,8 +14,8 @@ Empieza aquí. Haz solo lo del día que te toca. No te adelantes.
 - [ ] **(15 min)** Abre `01-oferta-y-precios.md` y léelo completo.
       Elige **UN servicio gancho** para liderar. Si no sabes cuál, escoge filtraciones.
 
-- [ ] **(10 min)** Abre `02-anuncios-listos.md` y reemplaza en todos los textos:
-      `[TU NOMBRE]`, `[TU TELÉFONO]`, `[TU ZONA]`.
+- [ ] **(10 min)** Abre `02-anuncios-listos.md`. Tu nombre y tu número **ya están puestos**.
+      Solo cambia `[TU ZONA]` si quieres enfocarlo en un sector concreto.
 
 - [ ] **(5 min)** Publica el **Estado día 1** de WhatsApp.
 
@@ -24,8 +24,8 @@ Empieza aquí. Haz solo lo del día que te toca. No te adelantes.
 
 - [ ] **(20 min)** Arregla tu WhatsApp:
       - Foto de perfil: tú trabajando, o tus herramientas. No un paisaje.
-      - Nombre: `[TU NOMBRE] - Remodelación`
-      - Info: `Construcción y remodelación en [ZONA] · Presupuesto gratis`
+      - Nombre: `César Lebrón - Remodelación`
+      - Info: `Construcción y remodelación · Presupuesto gratis · 809-419-0633`
 
 > **Meta del día:** 20 personas contactadas.
 > **Esperado:** 2–4 responden algo. Puede que ninguna hoy. Es normal.

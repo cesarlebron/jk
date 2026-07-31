@@ -13,9 +13,9 @@ Copia esto en una nota, llénalo, mándalo como **PDF o captura de pantalla**
 
 ```
 ═══════════════════════════════════════════════
-   [TU NOMBRE / CONSTRUCTORA]
+   CÉSAR LEBRÓN
    Construcción y Remodelación
-   Tel: [TU TELÉFONO]
+   Tel: 809-419-0633
 ═══════════════════════════════════════════════
 
 PRESUPUESTO N° [001]
@@ -77,7 +77,7 @@ su aprobación por escrito antes de ejecutarse.
 ───────────────────────────────────────────────
 
 Cuenta para el anticipo:
-[BANCO] — [N° DE CUENTA] — [TU NOMBRE]
+[BANCO] — [N° DE CUENTA] — César Lebrón
 
 ═══════════════════════════════════════════════
 ```
@@ -88,9 +88,9 @@ Cuenta para el anticipo:
 
 ```
 ═══════════════════════════════════════════════
-   CONSTRUCTORA [NOMBRE]
+   CÉSAR LEBRÓN
    Construcción y Remodelación
-   Tel: 809-000-0000
+   Tel: 809-419-0633
 ═══════════════════════════════════════════════
 
 PRESUPUESTO N° 001
