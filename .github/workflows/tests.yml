@@ -1,0 +1,64 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+# Cancel superseded runs on the same ref instead of paying for both.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # 20 is the oldest release with a stable node:test runner; 22 is what
+        # the project is developed against.
+        node: ['20', '22']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          # No npm cache: package-lock.json is gitignored, and setup-node's
+          # cache needs a lockfile to key on.
+
+      # No lockfile, so `install` rather than `ci`.
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      # tests/navegador.test.js drives the built bundle in a real browser.
+      # It skips itself when Playwright has no browser, which would turn a
+      # real regression into a silent pass — so install one explicitly.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # The browser test opens dist/cotizador.html, which build.js generates.
+      - name: Build the single-file bundle
+        run: npm run build
+
+      # `tee` would swallow npm's exit code, so pipefail is required for a
+      # failing suite to fail the job.
+      - name: Run tests
+        shell: bash
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee /tmp/test-output.txt
+
+      # The browser test skips itself when it finds no Chromium, which would
+      # turn a real regression into a silent pass. Treat any skip as failure.
+      - name: Verify no test skipped
+        shell: bash
+        run: |
+          if grep -qE '^# (skipped|todo) [1-9]' /tmp/test-output.txt; then
+            echo "::error::Tests were skipped — the browser test likely found no Chromium."
+            grep -E '^# (skipped|todo)' /tmp/test-output.txt
+            exit 1
+          fi
+          grep -E '^# (tests|pass|fail)' /tmp/test-output.txt

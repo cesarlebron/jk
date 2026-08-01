@@ -109,7 +109,12 @@ textarea { min-height: 70px; resize: vertical; }
 input[type="number"] { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* Móvil: 16px evita que iOS haga zoom al enfocar un campo. */
-@media (max-width: 640px) { input, select, textarea { font-size: 16px; } }
+@media (max-width: 640px) {
+  input, select, textarea { font-size: 16px; }
+  /* Objetivo táctil mínimo: el botón de borrar medía 30x27 y se pulsa con el
+     pulgar, de pie en la obra. */
+  button.icono { min-width: 44px; min-height: 44px; }
+}
 
 button {
   cursor: pointer;
@@ -134,7 +139,22 @@ button.peligro:hover { border-color: var(--alerta); color: var(--alerta); }
    él, esos spans absolutos se anclan al viewport en su posición estática
    (x≈690) y estiran el scroll horizontal de TODA la página en el celular,
    aunque sean invisibles. */
-.tabla-envoltura { overflow-x: auto; -webkit-overflow-scrolling: touch; position: relative; }
+/*
+ * En móvil la tabla no cabe: Importe y el botón de borrar quedan fuera de
+ * pantalla, y sin barra de scroll visible nada indica que hay más a la
+ * derecha. El degradado del borde derecho es esa pista, y desaparece al
+ * llegar al final gracias a que el fondo va anclado al scroll.
+ */
+.tabla-envoltura {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  background:
+    linear-gradient(to right, var(--fondo) 30%, transparent) left center / 2.5rem 100% no-repeat local,
+    linear-gradient(to left, var(--fondo) 30%, transparent) right center / 2.5rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, .18), transparent) left center / .75rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, .18), transparent) right center / .75rem 100% no-repeat scroll;
+}
 
 table { width: 100%; border-collapse: collapse; font-size: .88rem; }
 th, td { padding: .4rem .45rem; text-align: left; border-bottom: 1px solid var(--borde); vertical-align: middle; }
