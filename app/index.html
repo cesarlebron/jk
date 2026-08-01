@@ -145,6 +145,35 @@
 
 <div id="aviso-flotante" class="aviso-flotante" role="status" aria-live="polite"></div>
 
+<!--
+  Abierto con doble clic desde el disco, el navegador bloquea los módulos ES
+  por CORS y esta página se queda muerta: sin tabla, sin totales y sin ningún
+  mensaje. Para uso sin servidor está dist/cotizador.html, que es un archivo
+  único. Este cartel aparece solo si los módulos no llegaron a arrancar.
+-->
+<div id="sin-modulos" hidden>
+  <h2>Esta versión necesita un servidor</h2>
+  <p>
+    Al abrir este archivo directamente desde el disco, el navegador bloquea la
+    carga de los módulos por seguridad, y la página no puede arrancar.
+  </p>
+  <p>
+    <strong>Usa <a href="../dist/cotizador.html">cotizador.html</a></strong>:
+    es el mismo cotizador en un solo archivo, pensado justo para esto —
+    funciona sin servidor y sin internet.
+  </p>
+</div>
+
 <script type="module" src="../src/ui.js"></script>
+<script>
+  // Sin type="module": este sí corre por file://. Si a los 400 ms la tabla
+  // sigue sin construirse, es que ui.js nunca llegó a ejecutarse.
+  setTimeout(function () {
+    var cuerpo = document.getElementById("cuerpo-partidas");
+    if (cuerpo && cuerpo.children.length === 0) {
+      document.getElementById("sin-modulos").hidden = false;
+    }
+  }, 400);
+</script>
 </body>
 </html>

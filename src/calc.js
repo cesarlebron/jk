@@ -176,21 +176,80 @@ export function calcularCotizacion(partidas = [], config = {}) {
 }
 
 /** Formatea dinero para mostrar. */
-export function formatearDinero(valor, cfg = CONFIG_POR_DEFECTO) {
+/**
+ * Decimales que necesita un precio unitario para que, multiplicado por la
+ * cantidad, dé el importe impreso.
+ *
+ * Dos decimales bastan en cantidades pequeñas, pero el error se multiplica:
+ * 3,019.65 / 1,250 = 2.41572, y a dos decimales el cliente multiplica
+ * 1,250 × 2.42 = 3,025.00 y ve 5.35 de diferencia. Ese descuadre lo comprueba
+ * cualquiera con el teléfono en la mesa, así que se le dan al unitario los
+ * decimales que hagan falta, hasta cuatro.
+ */
+export function decimalesUnitario(total, cantidad) {
+  const cant = numeroPositivo(cantidad);
+  if (cant <= 0) return 2;
+  for (let d = 2; d < 4; d++) {
+    if (Math.abs(redondear(redondear(total / cant, d) * cant) - redondear(total)) <= 0.01) return d;
+  }
+  return 4;
+}
+
+/**
+ * El cliente NUNCA debe ver el desglose de costo y utilidad. Lo que ve es un
+ * precio unitario de venta que ya lleva todo adentro. Se reparte el margen
+ * proporcionalmente entre las líneas, y se ajusta el último centavo en la
+ * partida mayor para que la columna cuadre con el subtotal exacto.
+ *
+ * Vive aquí, y no en la capa de pintado, porque es aritmética que el cliente
+ * comprueba a mano: merece tests.
+ */
+export function conPreciosDeVenta(q) {
+  const factor = q.costoDirecto > 0 ? q.baseImponible / q.costoDirecto : 0;
+
+  const lineas = q.lineas.map((l) => ({ ...l, totalVenta: redondear(l.total * factor) }));
+
+  const suma = redondear(lineas.reduce((a, l) => a + l.totalVenta, 0));
+  const desfase = redondear(q.baseImponible - suma);
+  if (desfase !== 0 && lineas.length) {
+    // Se absorbe en la partida de mayor importe: es donde menos se nota.
+    let mayor = 0;
+    lineas.forEach((l, i) => { if (l.totalVenta > lineas[mayor].totalVenta) mayor = i; });
+    lineas[mayor] = { ...lineas[mayor], totalVenta: redondear(lineas[mayor].totalVenta + desfase) };
+  }
+
+  // El unitario se deriva al final, ya con el importe definitivo, para que la
+  // partida que absorbió el descuadre cuadre igual que las demás.
+  return {
+    ...q,
+    lineas: lineas.map((l) => ({
+      ...l,
+      costoUnitarioVenta: redondear(l.totalVenta / numeroPositivo(l.cantidad), decimalesUnitario(l.totalVenta, l.cantidad)) || 0,
+    })),
+  };
+}
+
+/**
+ * `decimales` sube la precisión por encima de los dos habituales. Solo lo usa
+ * el precio unitario del documento: si se redondea a dos, la multiplicación
+ * que el cliente hace en la mesa deja de cuadrar con el importe impreso.
+ */
+export function formatearDinero(valor, cfg = CONFIG_POR_DEFECTO, decimales = 2) {
   const n = numero(valor);
+  const d = Math.min(Math.max(Math.trunc(numeroPositivo(decimales, 2)), 2), 6);
   try {
     return new Intl.NumberFormat(cfg.locale || "es-DO", {
       style: "currency",
       currency: cfg.moneda || "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: d,
+      maximumFractionDigits: d,
     }).format(n);
   } catch {
     // Intl solo lanza si la moneda o el locale no son válidos, así que aquí
     // cfg.moneda ya es sospechoso. Devolverlo tal cual lo llevaba crudo hasta
     // el innerHTML que pinta los totales: se descarta en vez de propagarlo.
     const codigo = /^[A-Za-z]{3}$/.test(String(cfg.moneda || "")) ? cfg.moneda.toUpperCase() : "";
-    return codigo ? `${codigo} ${n.toFixed(2)}` : n.toFixed(2);
+    return codigo ? `${codigo} ${n.toFixed(d)}` : n.toFixed(d);
   }
 }
 

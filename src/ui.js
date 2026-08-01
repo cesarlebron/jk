@@ -6,6 +6,8 @@
 import {
   calcularCotizacion,
   compararMargenMarkup,
+  conPreciosDeVenta,
+  decimalesUnitario,
   formatearDinero,
   formatearPorcentaje,
   numero,
@@ -130,10 +132,10 @@ function pintarPartidas(q) {
             ${UNIDADES.map((u) => `<option${u === p.unidad ? " selected" : ""}>${u}</option>`).join("")}
           </select>
         </td>
-        <td class="col-num"><input type="number" step="any" min="0" data-p="cantidad" value="${numeroPositivo(p.cantidad)}" aria-label="Cantidad línea ${i + 1}"></td>
-        <td class="col-num"><input type="number" step="any" min="0" data-p="costoMaterial" value="${numeroPositivo(p.costoMaterial)}" aria-label="Material línea ${i + 1}"></td>
-        <td class="col-num"><input type="number" step="any" min="0" data-p="costoManoObra" value="${numeroPositivo(p.costoManoObra)}" aria-label="Mano de obra línea ${i + 1}"></td>
-        <td class="col-num"><input type="number" step="any" min="0" max="100" data-p="desperdicioPct" value="${redondear(p.desperdicio * 100, 2)}" aria-label="Desperdicio % línea ${i + 1}"></td>
+        <td class="col-num"><input type="text" inputmode="decimal" data-p="cantidad" value="${numeroPositivo(p.cantidad)}" aria-label="Cantidad línea ${i + 1}"></td>
+        <td class="col-num"><input type="text" inputmode="decimal" data-p="costoMaterial" value="${numeroPositivo(p.costoMaterial)}" aria-label="Material línea ${i + 1}"></td>
+        <td class="col-num"><input type="text" inputmode="decimal" data-p="costoManoObra" value="${numeroPositivo(p.costoManoObra)}" aria-label="Mano de obra línea ${i + 1}"></td>
+        <td class="col-num"><input type="text" inputmode="decimal" data-p="desperdicioPct" value="${redondear(p.desperdicio * 100, 2)}" aria-label="Desperdicio % línea ${i + 1}"></td>
         <td class="num">${formatearDinero(l.total, actual.config)}</td>
         <td><button class="icono peligro" data-accion="borrar" aria-label="Eliminar línea ${i + 1}">✕</button></td>
       </tr>`;
@@ -156,7 +158,7 @@ function pintarTotales(q) {
     `<div class="total-linea separador"><span>Costo total (tu punto de equilibrio)</span><span>${f(q.costoTotal)}</span></div>
      <div class="total-linea"><span>Utilidad</span><span>${f(q.utilidad)}</span></div>
      <div class="total-linea tenue"><span>Margen real sobre la venta</span>
-       <span class="pastilla ${q.margenReal >= 0.15 ? "ok" : "mal"}">${formatearPorcentaje(q.margenReal)}</span></div>
+       <span class="pastilla ${q.costoDirecto <= 0 ? "" : q.margenReal >= 0.15 ? "ok" : "mal"}">${formatearPorcentaje(q.margenReal)}</span></div>
      <div class="total-linea separador"><span>Subtotal</span><span>${f(q.baseImponible)}</span></div>
      <div class="total-linea tenue"><span>Impuesto (${formatearPorcentaje(q.config.impuesto)})</span><span>${f(q.impuesto)}</span></div>
      <div class="total-linea grande separador"><span>TOTAL</span><span>${f(q.total)}</span></div>
@@ -239,7 +241,7 @@ function pintarHistorial() {
 
 function pintarDocumento(q) {
   const e = estado.empresa;
-  const f = (v) => formatearDinero(v, actual.config);
+  const f = (v, decimales) => formatearDinero(v, actual.config, decimales);
 
   const contacto = [e.telefono, e.correo, e.direccion, e.rnc ? `RNC: ${e.rnc}` : ""]
     .filter(Boolean)
@@ -253,7 +255,7 @@ function pintarDocumento(q) {
       <td>${escapar(l.descripcion || "—")}</td>
       <td>${escapar(l.unidad)}</td>
       <td class="num">${numero(l.cantidad).toLocaleString("es-DO", { maximumFractionDigits: 2 })}</td>
-      <td class="num">${f(l.costoUnitarioVenta)}</td>
+      <td class="num">${f(l.costoUnitarioVenta, decimalesUnitario(l.totalVenta, l.cantidad))}</td>
       <td class="num">${f(l.totalVenta)}</td>
     </tr>`
     )
@@ -325,36 +327,21 @@ function pintarDocumento(q) {
 }
 
 /**
- * El cliente NUNCA debe ver el desglose de costo y utilidad. Lo que ve es un
- * precio unitario de venta que ya lleva todo adentro. Se reparte el margen
- * proporcionalmente entre las líneas, y se ajusta el último centavo en la
- * partida mayor para que la columna cuadre con el subtotal exacto.
+ * ¿Hay trabajo que se perdería al cerrar?
+ *
+ * Antes solo se miraba si la cotización se había guardado alguna vez, así que
+ * en cuanto se pulsaba Guardar una sola vez el aviso callaba para siempre:
+ * se podía cambiar una cantidad, añadir líneas y recargar sin una sola
+ * advertencia, y el trabajo se iba. Ahora se compara el contenido actual
+ * contra el guardado.
  */
-function conPreciosDeVenta(q) {
-  const factor = q.costoDirecto > 0 ? q.baseImponible / q.costoDirecto : 0;
-
-  const lineas = q.lineas.map((l) => {
-    const totalVenta = redondear(l.total * factor);
-    const cant = numeroPositivo(l.cantidad);
-    return {
-      ...l,
-      totalVenta,
-      costoUnitarioVenta: cant > 0 ? redondear(totalVenta / cant) : 0,
-    };
-  });
-
-  const suma = redondear(lineas.reduce((a, l) => a + l.totalVenta, 0));
-  const desfase = redondear(q.baseImponible - suma);
-  if (desfase !== 0 && lineas.length) {
-    // Se absorbe en la partida de mayor importe: es donde menos se nota.
-    let mayor = 0;
-    lineas.forEach((l, i) => { if (l.totalVenta > lineas[mayor].totalVenta) mayor = i; });
-    lineas[mayor] = { ...lineas[mayor], totalVenta: redondear(lineas[mayor].totalVenta + desfase) };
-    const c = numeroPositivo(lineas[mayor].cantidad);
-    if (c > 0) lineas[mayor].costoUnitarioVenta = redondear(lineas[mayor].totalVenta / c);
-  }
-
-  return { ...q, lineas };
+function hayCambiosSinGuardar() {
+  if (!actual.partidas.length) return false;
+  const guardada = estado.cotizaciones.find((c) => c.numero === actual.numero);
+  if (!guardada) return true;
+  // `total` y `guardada` los añade el guardado, no forman parte de lo editado.
+  const { total: _t, guardada: _g, ...contenido } = guardada;
+  return JSON.stringify(contenido) !== JSON.stringify(actual);
 }
 
 function render() {
@@ -512,6 +499,20 @@ function conectar() {
     pintarDocumento(conPreciosDeVenta(q));
   });
 
+  // Al salir del campo se reescribe lo interpretado. Sin esto, teclear "-10"
+  // dejaba "-10" a la vista mientras el importe se calculaba con 0, y la fila
+  // mostraba dos datos que se contradecían.
+  $("#cuerpo-partidas").addEventListener("change", (ev) => {
+    const campo = ev.target.dataset.p;
+    if (!campo || campo === "descripcion" || campo === "unidad") return;
+    const fila = Number(ev.target.closest("tr").dataset.fila);
+    const p = actual.partidas[fila];
+    if (!p) return;
+    ev.target.value = campo === "desperdicioPct"
+      ? redondear(p.desperdicio * 100, 2)
+      : numeroPositivo(p[campo]);
+  });
+
   $("#cuerpo-partidas").addEventListener("click", (ev) => {
     if (ev.target.dataset.accion !== "borrar") return;
     const fila = Number(ev.target.closest("tr").dataset.fila);
@@ -576,7 +577,16 @@ function conectar() {
       actual.config[campo] = numeroPositivo(ev.target.value) / 100;
     }
     // Estos porcentajes son de la empresa, no de una cotización suelta.
+    // Lo que se guarda se recorta a un margen usable aunque lo tecleado sea
+    // imposible: el aviso de "margen del 100% o más" tiene que verse mientras
+    // se escribe, pero persistirlo hacía que la app volviera a abrir en estado
+    // de error en cada carga posterior, y de ahí solo se salía adivinando que
+    // había que reeditar el campo. El markup no se recorta: por encima del
+    // 100% es legítimo.
     estado.config = { ...actual.config };
+    if (estado.config.modoUtilidad !== "markup") {
+      estado.config.utilidad = Math.min(numeroPositivo(estado.config.utilidad), 0.99);
+    }
     persistir();
     render();
   });
@@ -674,12 +684,9 @@ function conectar() {
   });
 
   window.addEventListener("beforeunload", (ev) => {
-    if (!actual.partidas.length) return;
-    const guardada = estado.cotizaciones.find((c) => c.numero === actual.numero);
-    if (!guardada || guardada.total === undefined) {
-      ev.preventDefault();
-      ev.returnValue = "";
-    }
+    if (!hayCambiosSinGuardar()) return;
+    ev.preventDefault();
+    ev.returnValue = "";
   });
 }
 
