@@ -1,3 +1,7 @@
 node_modules/
 package-lock.json
 .DS_Store
+
+# gstack per-repo runtime state (daemon pid/port, session tokens, browse logs)
+.gstack/
+.gstack-worktrees/
