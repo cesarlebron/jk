@@ -102,8 +102,46 @@ páginas reales.
 ### Notas de este entorno
 
 - La descarga de Chromium de Playwright está bloqueada por la política de red de
-  la sesión; `/browse` usa el Chromium preinstalado en `/opt/pw-browsers`
-  (build 141.x, enlazado como `chromium-1208`).
+  la sesión; `/browse` usa el Chromium preinstalado en `/opt/pw-browsers`.
+- Hay **dos** instalaciones de Playwright con builds distintos: la del repo y la
+  de gstack. Cada una fija su propio número de build, así que el enlace de
+  Chromium se hace por instalación, no una sola vez.
 - La salida a internet pasa por el proxy del entorno, que solo permite los hosts
   de su allowlist. Si `/browse` devuelve `ERR_TUNNEL_CONNECTION_FAILED`, el host
   está denegado por política de red, no es un fallo de gstack.
+
+## Configuración automática
+
+El contenedor es efímero: todo lo que viva fuera del repo desaparece en la
+sesión siguiente. Por eso el estado se reconstruye desde el propio repo.
+
+`.claude/hooks/session-start.sh` corre al arrancar cada sesión y deja el
+entorno listo sin ningún paso manual:
+
+1. `npm install` para las dependencias del proyecto.
+2. Enlaza el Chromium preinstalado (por instalación de Playwright).
+3. Reinstala gstack si falta.
+4. Exporta `$B` (binario de browse) y añade `gstack/bin` al `PATH`.
+
+Es idempotente y no interactivo. Los pasos de gstack son best-effort: si
+fallan, avisan y siguen — nunca bloquean la sesión.
+
+**Si añades una dependencia nueva al proyecto, no hace falta tocar el hook**:
+`npm install` ya la recoge. Solo edítalo si necesitas una herramienta de
+sistema que no venga en la imagen.
+
+## Subagentes
+
+Están en `.claude/agents/`. Se invocan solos cuando la tarea encaja con su
+descripción; también puedes pedirlos por nombre.
+
+- **`auditor-seguridad`** — audita el diff buscando secretos, XSS, validación
+  débil y dependencias vulnerables. Exige un escenario de explotación concreto
+  por hallazgo. No arregla, reporta.
+- **`qa-visual`** — prueba la app en navegador real con `/browse`: flujo de
+  cotización, consola, persistencia y viewport móvil. Verifica los totales
+  calculándolos aparte.
+- **`verificador-margen`** — verifica la aritmética de `src/calc.js`. El precio
+  correcto es `costo / (1 - margen)`, no `costo × (1 + margen)`; confundirlos
+  hace que el contratista cobre de menos. Calcula a mano antes de leer el
+  código, para no heredar su error.
