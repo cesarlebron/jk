@@ -121,7 +121,6 @@ export function calcularCotizacion(partidas = [], config = {}) {
     subtotal = redondear(costoTotal / (1 - utilidadPct));
   }
 
-  const utilidad = redondear(subtotal - costoTotal);
   const impuestoPct = numeroPositivo(cfg.impuesto);
 
   let baseImponible;
@@ -138,6 +137,12 @@ export function calcularCotizacion(partidas = [], config = {}) {
     impuesto = redondear(subtotal * impuestoPct);
     total = redondear(subtotal + impuesto);
   }
+
+  // Contra baseImponible, NO contra subtotal: cuando el precio lleva el
+  // impuesto dentro, ese impuesto se le remite al gobierno y no es ganancia
+  // del contratista. Medirlo contra subtotal inflaba la utilidad justo en el
+  // monto del ITBIS y hacía que margenReal superase el margen que se pidió.
+  const utilidad = redondear(baseImponible - costoTotal);
 
   const anticipo = redondear(total * numeroPositivo(cfg.anticipo));
 
@@ -157,7 +162,15 @@ export function calcularCotizacion(partidas = [], config = {}) {
     anticipo,
     saldo: redondear(total - anticipo),
     // Punto de equilibrio: por debajo de esto se trabaja gratis o se pierde.
-    puntoEquilibrio: costoTotal,
+    // Va en la misma escala que el precio que el usuario fija, que es contra
+    // lo que la UI lo compara. Con el impuesto por fuera ese precio es el
+    // subtotal y el piso es el costo pelado; con el impuesto dentro el precio
+    // es el total, y hay que subir el piso porque de ahí sale el ITBIS que se
+    // remite. Sin esto, el aviso de "estás pagando por trabajar" señalaba un
+    // número por debajo del cual el contratista ya llevaba rato perdiendo.
+    puntoEquilibrio: cfg.impuestoIncluido
+      ? redondear(costoTotal * (1 + impuestoPct))
+      : costoTotal,
     config: cfg,
   };
 }
@@ -173,7 +186,11 @@ export function formatearDinero(valor, cfg = CONFIG_POR_DEFECTO) {
       maximumFractionDigits: 2,
     }).format(n);
   } catch {
-    return `${cfg.moneda || "USD"} ${n.toFixed(2)}`;
+    // Intl solo lanza si la moneda o el locale no son válidos, así que aquí
+    // cfg.moneda ya es sospechoso. Devolverlo tal cual lo llevaba crudo hasta
+    // el innerHTML que pinta los totales: se descarta en vez de propagarlo.
+    const codigo = /^[A-Za-z]{3}$/.test(String(cfg.moneda || "")) ? cfg.moneda.toUpperCase() : "";
+    return codigo ? `${codigo} ${n.toFixed(2)}` : n.toFixed(2);
   }
 }
 

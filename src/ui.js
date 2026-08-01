@@ -51,7 +51,9 @@ function hoy() {
 
 function fechaLarga(iso) {
   const [a, m, d] = String(iso || "").split("-").map(Number);
-  if (!a || !m || !d) return iso || "";
+  // Escapado: esta rama devolvía la entrada intacta, y la salida se interpola
+  // en el documento sin pasar por escapar().
+  if (!a || !m || !d) return escapar(iso || "");
   try {
     return new Date(a, m - 1, d).toLocaleDateString("es-DO", {
       day: "numeric", month: "long", year: "numeric",
@@ -128,9 +130,9 @@ function pintarPartidas(q) {
             ${UNIDADES.map((u) => `<option${u === p.unidad ? " selected" : ""}>${u}</option>`).join("")}
           </select>
         </td>
-        <td class="col-num"><input type="number" step="any" min="0" data-p="cantidad" value="${p.cantidad}" aria-label="Cantidad línea ${i + 1}"></td>
-        <td class="col-num"><input type="number" step="any" min="0" data-p="costoMaterial" value="${p.costoMaterial}" aria-label="Material línea ${i + 1}"></td>
-        <td class="col-num"><input type="number" step="any" min="0" data-p="costoManoObra" value="${p.costoManoObra}" aria-label="Mano de obra línea ${i + 1}"></td>
+        <td class="col-num"><input type="number" step="any" min="0" data-p="cantidad" value="${numeroPositivo(p.cantidad)}" aria-label="Cantidad línea ${i + 1}"></td>
+        <td class="col-num"><input type="number" step="any" min="0" data-p="costoMaterial" value="${numeroPositivo(p.costoMaterial)}" aria-label="Material línea ${i + 1}"></td>
+        <td class="col-num"><input type="number" step="any" min="0" data-p="costoManoObra" value="${numeroPositivo(p.costoManoObra)}" aria-label="Mano de obra línea ${i + 1}"></td>
         <td class="col-num"><input type="number" step="any" min="0" max="100" data-p="desperdicioPct" value="${redondear(p.desperdicio * 100, 2)}" aria-label="Desperdicio % línea ${i + 1}"></td>
         <td class="num">${formatearDinero(l.total, actual.config)}</td>
         <td><button class="icono peligro" data-accion="borrar" aria-label="Eliminar línea ${i + 1}">✕</button></td>
