@@ -9,6 +9,12 @@ estén en su lista: copiarlas aquí las hace funcionar en la primera sesión, si
 red y sin depender de que GitHub esté accesible. También fija la versión, así
 que un cambio río arriba no altera el comportamiento sin que tú lo decidas.
 
+> **Cuatro de estas se solapan** (`frontend-design`, `impeccable`,
+> `design-taste-frontend` y las de Emil se disparan todas con «haz que esto se
+> vea mejor»). La regla de cuál gana según el tipo de tarea está en el
+> `CLAUDE.md` de la raíz, sección «Skills de diseño: cuál usar cuando varias
+> sirven» — ahí, y no aquí, porque es lo que el agente lee en cada sesión.
+
 ## Qué se instaló y de dónde
 
 | Skill | Qué hace | Origen |

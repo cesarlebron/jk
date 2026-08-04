@@ -110,6 +110,32 @@ páginas reales.
   de su allowlist. Si `/browse` devuelve `ERR_TUNNEL_CONNECTION_FAILED`, el host
   está denegado por política de red, no es un fallo de gstack.
 
+## Skills de diseño: cuál usar cuando varias sirven
+
+En `.claude/skills/` hay cuatro skills que se disparan con «haz que esto se vea
+mejor». Sin una regla, cuál se carga depende de cómo esté redactada la petición,
+y eso es una moneda al aire. **No lo dejes al azar: enruta por tipo de tarea.**
+
+| La tarea es… | Usa | Por qué esa y no las otras |
+|---|---|---|
+| Elegir dirección estética, «se ve genérico», rediseño de fondo | `frontend-design` | Es la única que obliga a criticar el plan *antes* de escribir código, y trae la lista concreta de los tres «looks de IA» que hay que evitar. La más rigurosa contra el resultado por defecto. |
+| Defectos concretos: espaciado, jerarquía, anti-patrones | `impeccable` | Es la única que **ejecuta código** y devuelve hallazgos verificables con archivo y línea, en vez de opiniones. `node .claude/skills/impeccable/scripts/detect.mjs --target <archivo>`. |
+| Movimiento, animación, transiciones, gestos | Las de Emil (`emil-design-eng`, `improve-animations`, `review-animations`, …) | No compiten con nadie: son las únicas de motion. |
+| Rediseñar **y** publicar en el mismo flujo | `disenar-y-publicar` | Encadena `frontend-design` → pruebas → `deploy-to-vercel` con la suite como puerta. |
+
+`design-taste-frontend` queda como cuarta opción. Solapa con `frontend-design` y
+con `impeccable` sin superar a ninguna, y está pensada para landings y
+portafolios, no para una herramienta de trabajo. Úsala solo si se pide por
+nombre.
+
+Este orden sale de leer las cuatro, no de un benchmark. El único dato duro
+disponible favorece a `impeccable`: su detector encontró un anti-patrón real en
+`src/styles.css` (borde grueso de color en un lado de una tarjeta) que ninguna
+de las otras habría señalado sola.
+
+**Cuando la persona nombre una skill, gana la nombrada.** Esta tabla decide solo
+cuando no se nombró ninguna.
+
 ## Configuración automática
 
 El contenedor es efímero: todo lo que viva fuera del repo desaparece en la
