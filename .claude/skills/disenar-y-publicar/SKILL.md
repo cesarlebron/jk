@@ -108,5 +108,3 @@ deja el proyecto enlazado y habilita despliegues por `git push`.
 - **Solo publicar** algo ya diseñado → `deploy-to-vercel` a secas.
 - **Pulir detalle fino** (espaciado, jerarquía, anti-patrones) → `impeccable`
   o `design-taste-frontend`, que son más específicas para eso.
-- **Tocar `whatsapp-mcp/`** → nada de esto aplica: es un servicio en Go sin
-  interfaz.

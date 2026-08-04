@@ -110,9 +110,9 @@ EVERY RESPONSE». Lo consigue con tres hooks que inyectan sus instrucciones al
 arrancar la sesión, al lanzar un subagente y en cada prompt del usuario.
 
 No se conectaron porque eso cambia el comportamiento del agente en **todas** las
-sesiones futuras de este repositorio, incluido el puente de Go. Es una decisión
-de proyecto, no un detalle de instalación. Sin los hooks la skill funciona
-igual cuando la invocas (`/ponytail`), solo que no se queda pegada.
+sesiones futuras de este repositorio. Es una decisión de proyecto, no un
+detalle de instalación. Sin los hooks la skill funciona igual cuando la
+invocas (`/ponytail`), solo que no se queda pegada.
 
 Si la quieres siempre activa, añade esto a los `hooks` de
 `.claude/settings.json` (la plantilla de río arriba está en
@@ -165,9 +165,9 @@ no la dejes ganar por omisión.
 
 Impeccable trae hooks opcionales que ejecutan Node en cada `Edit`/`Write` y al
 terminar cada turno, para revisar automáticamente lo que tocaste. No se
-activaron por dos razones: correrían sobre *todo* el repositorio, incluido el
-puente de WhatsApp en `whatsapp-mcp/` que no tiene interfaz; y meten latencia
-en cada edición. La skill funciona igual cuando la invocas — el hook solo
+activaron por dos razones: correrían sobre *todo* el repositorio, incluidos el
+motor de cálculo y las pruebas, que no tienen interfaz; y meten latencia en
+cada edición. La skill funciona igual cuando la invocas — el hook solo
 añade la capa automática.
 
 Si la quieres, requiere Node 22 o superior (este entorno trae 22.22) y se
