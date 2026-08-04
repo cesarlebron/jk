@@ -1,0 +1,44 @@
+# Two containers: the bridge itself, and Caddy in front of it to obtain and
+# renew a Let's Encrypt certificate automatically. claude.ai will only talk to
+# an HTTPS endpoint, so the reverse proxy is not optional.
+#
+# Copy .env.example to .env and fill it in before running `docker compose up -d`.
+
+services:
+  bridge:
+    build: .
+    restart: unless-stopped
+    environment:
+      # Must match the domain Caddy serves, including the https:// scheme.
+      WHATSAPP_MCP_PUBLIC_URL: ${WHATSAPP_MCP_PUBLIC_URL:?falta WHATSAPP_MCP_PUBLIC_URL en .env}
+      WHATSAPP_MCP_PASSPHRASE: ${WHATSAPP_MCP_PASSPHRASE:?falta WHATSAPP_MCP_PASSPHRASE en .env}
+      # Off by default: Claude can read your history but not message anyone.
+      WHATSAPP_MCP_ALLOW_SEND: ${WHATSAPP_MCP_ALLOW_SEND:-false}
+      WHATSAPP_MCP_DEBUG: ${WHATSAPP_MCP_DEBUG:-false}
+      TZ: ${TZ:-UTC}
+    volumes:
+      - bridge-data:/data
+    # Not published to the host: Caddy is the only way in.
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - bridge
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      WHATSAPP_MCP_DOMAIN: ${WHATSAPP_MCP_DOMAIN:?falta WHATSAPP_MCP_DOMAIN en .env}
+      ACME_EMAIL: ${ACME_EMAIL:?falta ACME_EMAIL en .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  bridge-data:
+  caddy-data:
+  caddy-config:
