@@ -1,0 +1,6 @@
+{
+  "_comentario": "El package.json de la raíz declara \"type\": \"module\", lo que haría que Node tratase estos hooks como ESM y fallasen: están escritos en CommonJS (require). Node busca el package.json más cercano hacia arriba, así que este archivo los devuelve a CommonJS sin tocar una sola línea del código de terceros.",
+  "name": "ponytail-hooks-local",
+  "private": true,
+  "type": "commonjs"
+}

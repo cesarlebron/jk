@@ -1,7 +1,7 @@
 # Skills
 
-Dieciséis skills de terceros para que la interfaz del cotizador deje de parecer
-generada por una IA, más una propia que encadena diseño y publicación.
+Veintiuna skills de terceros — diseño de interfaz, publicación y una que obliga
+a escribir menos código — más una propia que encadena diseño y publicación.
 
 Están **versionadas dentro del repo**, no instaladas en `~/.claude/skills`. El
 contenedor es efímero y la política de red del entorno bloquea hosts que no
@@ -29,6 +29,12 @@ que un cambio río arriba no altera el comportamiento sin que tú lo decidas.
 | `agent-browser` | Automatización de navegador para agentes | vercel-labs/agent-browser |
 | `deploy-to-vercel` | Publica el proyecto en Vercel eligiendo el mejor camino | vercel-labs/agent-skills |
 | `disenar-y-publicar` | **Propia.** Encadena `frontend-design` → pruebas → `deploy-to-vercel` | este repo |
+| `ponytail` | Modo "senior perezoso": la solución más simple que funciona (YAGNI, stdlib primero) | DietrichGebert/ponytail |
+| `ponytail-review` | Revisión de un diff buscando solo sobreingeniería: qué borrar | DietrichGebert/ponytail |
+| `ponytail-audit` | Lo mismo pero sobre todo el repositorio, en lista priorizada | DietrichGebert/ponytail |
+| `ponytail-debt` | Recoge los comentarios `ponytail:` en un registro de deuda | DietrichGebert/ponytail |
+| `ponytail-gain` | Marcador con el impacto medido del benchmark | DietrichGebert/ponytail |
+| `ponytail-help` | Referencia rápida de modos y comandos de ponytail | DietrichGebert/ponytail |
 
 ### Versiones fijadas
 
@@ -41,6 +47,7 @@ que un cambio río arriba no altera el comportamiento sin que tú lo decidas.
 | [vercel-labs/skills](https://github.com/vercel-labs/skills) | `1164afa` | 2026-07-30 | MIT |
 | [vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser) | `01c1147` | 2026-08-02 | Apache 2.0 |
 | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) v3.0.0 | `7c180d9` | 2026-07-24 | MIT (declarada en el README; el repo no trae archivo de licencia) |
+| [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) v4.8.4 | `16f2980` | 2026-07-15 | MIT |
 
 Los textos de licencia están en `licencias/`, junto con el `NOTICE` que exige
 Apache 2.0. Ningún archivo fue modificado respecto al original.
@@ -73,6 +80,72 @@ install`). Sin ese CLI la skill no hace nada. Y ojo con lo de abajo.
 
 **De `deploy-to-vercel` se borró el `Archive.zip`** que trae río arriba: es un
 duplicado comprimido de la propia carpeta, peso muerto dentro de un repositorio.
+
+**De ponytail se instalaron sus seis skills y sus hooks, pero los hooks no están
+conectados.** Ver su sección más abajo.
+
+## ponytail: por qué necesita un `package.json` propio
+
+Los hooks de ponytail están escritos en CommonJS (`require`). El `package.json`
+de la raíz de este repositorio declara `"type": "module"`, y Node aplica esa
+declaración al `.js` de cualquier subdirectorio: los hooks reventaban con
+`require is not defined` nada más copiarlos.
+
+La solución está en `.claude/ponytail/package.json`, cuatro líneas con
+`"type": "commonjs"`. Node busca el `package.json` más cercano hacia arriba, así
+que ese archivo devuelve esos hooks a CommonJS **sin tocar una sola línea del
+código de terceros**, y sin afectar al resto del repositorio (las 63 pruebas
+siguen pasando).
+
+Los hooks tampoco están en `.claude/skills/`, sino en `.claude/ponytail/`. No es
+capricho: `ponytail-instructions.js` busca la skill en
+`__dirname/../skills/ponytail/SKILL.md`. Colgando de `.claude/`, esa ruta cae
+exactamente en `.claude/skills/ponytail/SKILL.md`. La estructura de río arriba
+se conserva y no hay que parchear rutas.
+
+### Los hooks de ponytail, y por qué están apagados
+
+Ponytail está diseñado para estar siempre activo — su propio texto dice «ACTIVE
+EVERY RESPONSE». Lo consigue con tres hooks que inyectan sus instrucciones al
+arrancar la sesión, al lanzar un subagente y en cada prompt del usuario.
+
+No se conectaron porque eso cambia el comportamiento del agente en **todas** las
+sesiones futuras de este repositorio, incluido el puente de Go. Es una decisión
+de proyecto, no un detalle de instalación. Sin los hooks la skill funciona
+igual cuando la invocas (`/ponytail`), solo que no se queda pegada.
+
+Si la quieres siempre activa, añade esto a los `hooks` de
+`.claude/settings.json` (la plantilla de río arriba está en
+`.claude/ponytail/hooks.json.ejemplo`, con las rutas sin adaptar):
+
+```json
+"SessionStart": [
+  { "matcher": "startup|resume|clear|compact",
+    "hooks": [{ "type": "command", "timeout": 5,
+      "command": "node \"$CLAUDE_PROJECT_DIR/.claude/ponytail/ponytail-activate.js\"" }] }
+],
+"SubagentStart": [
+  { "hooks": [{ "type": "command", "timeout": 5,
+      "command": "node \"$CLAUDE_PROJECT_DIR/.claude/ponytail/ponytail-subagent.js\"" }] }
+],
+"UserPromptSubmit": [
+  { "hooks": [{ "type": "command", "timeout": 5,
+      "command": "node \"$CLAUDE_PROJECT_DIR/.claude/ponytail/ponytail-mode-tracker.js\"" }] }
+]
+```
+
+Ojo: ya hay un `SessionStart` en `settings.json` (el script de arranque del
+repositorio). Añade el de ponytail a ese mismo array, no lo sustituyas.
+
+### Sobre las cifras que anuncia
+
+El repositorio promete «~54% menos código, ~20% más barato, ~27% más rápido,
+100% seguro». Vienen de su propio benchmark sobre otro proyecto
+(`full-stack-fastapi-template`, FastAPI + React), con doce tickets y el mismo
+agente con y sin la skill. Es un benchmark propio, no una verificación
+independiente, y ese repositorio no se parece al cotizador. Trata las cifras
+como marketing; el contenido de la skill, en cambio, es consejo de ingeniería
+razonable y verificable leyéndolo.
 
 ## Conflicto: `agent-browser` contra `/browse`
 
@@ -124,6 +197,9 @@ Auditado antes de instalar:
   subir tu código a un tercero sin sesión propia. Para este repositorio da
   igual — es público y MIT — pero conviene saberlo antes de usarlo en algo
   privado.
+- **ponytail**: nada. Cero `fetch`, cero telemetría, cero analítica en sus
+  hooks, scripts y MCP. Su `.env.example` pide una clave de Anthropic, pero es
+  solo para correr su propio benchmark, no para usar la skill.
 
 No se encontró exfiltración de código ni analítica de terceros en ninguna.
 
