@@ -1,0 +1,65 @@
+name: whatsapp-mcp
+
+# Scoped to the bridge: the quoting app at the repository root is a separate
+# Node project with its own workflow, and neither needs to run for the other.
+on:
+  push:
+    paths:
+      - 'whatsapp-mcp/**'
+      - '.github/workflows/whatsapp-mcp.yml'
+  pull_request:
+    paths:
+      - 'whatsapp-mcp/**'
+      - '.github/workflows/whatsapp-mcp.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: whatsapp-mcp
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: whatsapp-mcp/go.mod
+          cache-dependency-path: whatsapp-mcp/go.sum
+
+      # gofmt exits 0 even when it has complaints, so check for output instead.
+      - name: Check formatting
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "These files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test -race ./...
+
+      # CGO_ENABLED=0 is what the Dockerfile uses; a build that only works with
+      # cgo would break the image without breaking the tests.
+      - name: Build static binary
+        run: CGO_ENABLED=0 go build -trimpath -o /dev/null .
+
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The image is the primary way this gets deployed, so a broken Dockerfile
+      # is a broken release even when the Go build is fine.
+      - name: Build image
+        run: docker build -t whatsapp-mcp:ci whatsapp-mcp
