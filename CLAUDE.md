@@ -121,7 +121,8 @@ entorno listo sin ningún paso manual:
 1. `npm install` para las dependencias del proyecto.
 2. Enlaza el Chromium preinstalado (por instalación de Playwright).
 3. Reinstala gstack si falta.
-4. Exporta `$B` (binario de browse) y añade `gstack/bin` al `PATH`.
+4. Reinstala graphify si falta (salta si ya está, p. ej. en local).
+5. Exporta `$B` (binario de browse) y añade `gstack/bin` al `PATH`.
 
 Es idempotente y no interactivo. Los pasos de gstack son best-effort: si
 fallan, avisan y siguen — nunca bloquean la sesión.
@@ -129,6 +130,46 @@ fallan, avisan y siguen — nunca bloquean la sesión.
 **Si añades una dependencia nueva al proyecto, no hace falta tocar el hook**:
 `npm install` ya la recoge. Solo edítalo si necesitas una herramienta de
 sistema que no venga en la imagen.
+
+## graphify
+
+graphify (repo: https://github.com/safishamsi/graphify) convierte el proyecto en un
+grafo de conocimiento persistente en `graphify-out/`, con god nodes, comunidades y
+relaciones entre archivos. Sirve para responder preguntas sobre el código
+recorriendo el grafo en vez de releer archivos.
+
+### Reglas de uso
+
+- Para preguntas sobre el código, si existe `graphify-out/graph.json`, empieza por
+  `graphify query "<pregunta>"`. Usa `graphify path "<A>" "<B>"` para relaciones y
+  `graphify explain "<concepto>"` para un concepto puntual. Devuelven un subgrafo
+  acotado, normalmente mucho más pequeño que `GRAPH_REPORT.md` o que un grep crudo.
+- Lee `graphify-out/GRAPH_REPORT.md` solo para revisión amplia de arquitectura, o
+  cuando `query`/`path`/`explain` no den contexto suficiente.
+- Después de modificar código, corre `graphify update .` para mantener el grafo al
+  día. Es extracción AST, sin LLM y sin costo.
+- El grafo no se versiona (`graphify-out/` está en `.gitignore`): se reconstruye
+  desde el código.
+
+### Costo
+
+El código se extrae con tree-sitter: determinista, sin LLM, sin API key, cero
+tokens. Solo docs, PDFs e imágenes pasan por extracción semántica, que usa Gemini
+si `GEMINI_API_KEY` está definida y si no recae en el agente en ejecución. Hay
+caché por archivo, así que una segunda corrida solo paga lo que cambió.
+
+### Instalación
+
+En sesiones remotas la instala `.claude/hooks/session-start.sh` (paso 4), porque el
+contenedor es efímero. En tu máquina local basta una vez, y como el skill queda en
+`~/.claude/skills/` aplica a **todos** tus proyectos, no solo a este:
+
+```bash
+pip install graphifyy && graphify install
+```
+
+Si `graphify` no queda en el `PATH`, usa `pipx install graphifyy` o
+`uv tool install graphifyy` y repite `graphify install`. Requiere Python 3.10+.
 
 ## Subagentes
 

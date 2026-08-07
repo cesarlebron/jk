@@ -89,7 +89,38 @@ else
   log "bun not found — skipping gstack"
 fi
 
-# ── 4. Session environment ────────────────────────────────────────────────
+# ── 4. graphify ───────────────────────────────────────────────────────────
+# Same problem as gstack: the skill lives in ~/.claude/skills and goes away with
+# the container. Reinstall it so /graphify works without a manual step.
+#
+# No CLAUDE_CODE_REMOTE guard needed — the check below finds an existing local
+# install and skips, so a laptop that already has graphify is left alone.
+#
+# The PyPI package is graphifyy (double y) while the graphify name is being
+# reclaimed upstream; the CLI and the skill command are both graphify.
+install_graphify_cli() {
+  pip3 install --quiet graphifyy >/dev/null 2>&1 && return 0
+  pip3 install --quiet --break-system-packages graphifyy >/dev/null 2>&1 && return 0
+  command -v uv >/dev/null 2>&1 && uv tool install --quiet graphifyy >/dev/null 2>&1 && return 0
+  return 1
+}
+
+if command -v graphify >/dev/null 2>&1 && [ -f "$HOME/.claude/skills/graphify/SKILL.md" ]; then
+  log "graphify ready"
+else
+  if ! command -v graphify >/dev/null 2>&1; then
+    log "installing graphify"
+    install_graphify_cli || log "WARN: graphifyy install failed (network policy?)"
+  fi
+  if command -v graphify >/dev/null 2>&1; then
+    # Writes the skill to ~/.claude/skills/graphify/ so /graphify resolves.
+    graphify install >/dev/null 2>&1 \
+      && log "graphify ready" \
+      || log "WARN: graphify skill install failed"
+  fi
+fi
+
+# ── 5. Session environment ────────────────────────────────────────────────
 if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
   echo "export B=\"$GSTACK_DIR/browse/dist/browse\"" >> "$CLAUDE_ENV_FILE"
   echo "export PATH=\"$GSTACK_DIR/bin:\$PATH\"" >> "$CLAUDE_ENV_FILE"
