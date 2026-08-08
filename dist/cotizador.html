@@ -210,15 +210,22 @@ table input, table select { padding: .3rem .4rem; border-radius: 6px; }
 .total-linea.grande { font-size: 1.15rem; font-weight: 700; color: var(--acento); }
 .total-linea.tenue { color: var(--suave); font-size: .84rem; }
 
+/* Borde completo y tenue, no una barra gruesa a la izquierda: esa barra es el
+   tell más reconocible de una interfaz generada por IA. La gravedad sigue
+   codificada por partida doble — color del borde y del fondo — así que quitar
+   la barra no le resta señal a lo único que aquí de verdad importa. */
 .aviso {
-  border-left: 3px solid var(--acento);
+  border: 1px solid color-mix(in srgb, var(--acento) 35%, transparent);
   background: var(--acento-claro);
   padding: .55rem .7rem;
-  border-radius: 0 8px 8px 0;
+  border-radius: 8px;
   font-size: .84rem;
   margin-top: .7rem;
 }
-.aviso.malo { border-color: var(--alerta); background: var(--alerta-fondo); }
+.aviso.malo {
+  border-color: color-mix(in srgb, var(--alerta) 35%, transparent);
+  background: var(--alerta-fondo);
+}
 .aviso strong { display: block; margin-bottom: .15rem; }
 
 .pastilla { display: inline-block; padding: .1rem .45rem; border-radius: 999px; font-size: .72rem; font-weight: 700; }

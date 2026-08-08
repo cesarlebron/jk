@@ -70,7 +70,7 @@ muestra.mjs             Genera las capturas y el PDF de ejemplo
 ## Desarrollo
 
 ```bash
-npm test        # 42 pruebas: unitarias + end-to-end en navegador
+npm test        # 63 pruebas: unitarias + end-to-end en navegador
 npm run build   # regenera dist/cotizador.html
 ```
 
