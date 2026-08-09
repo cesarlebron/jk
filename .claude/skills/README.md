@@ -91,8 +91,8 @@ install`). Sin ese CLI la skill no hace nada. Y ojo con lo de abajo.
 **De `deploy-to-vercel` se borró el `Archive.zip`** que trae río arriba: es un
 duplicado comprimido de la propia carpeta, peso muerto dentro de un repositorio.
 
-**De ponytail se instalaron sus seis skills y sus hooks, pero los hooks no están
-conectados.** Ver su sección más abajo.
+**Los hooks de ponytail SÍ están conectados** en `.claude/settings.json`, por
+decisión explícita. Ver su sección más abajo.
 
 **De ui-ux-pro-max se tomó solo la skill principal.** El repositorio trae siete.
 Se dejaron fuera `ui-styling` (5,8 MB de shadcn/ui, Radix y Tailwind, que no
@@ -120,39 +120,30 @@ capricho: `ponytail-instructions.js` busca la skill en
 exactamente en `.claude/skills/ponytail/SKILL.md`. La estructura de río arriba
 se conserva y no hay que parchear rutas.
 
-### Los hooks de ponytail, y por qué están apagados
+### Los hooks de ponytail están activos
 
 Ponytail está diseñado para estar siempre activo — su propio texto dice «ACTIVE
-EVERY RESPONSE». Lo consigue con tres hooks que inyectan sus instrucciones al
+EVERY RESPONSE» — y lo consigue con tres hooks que inyectan sus instrucciones al
 arrancar la sesión, al lanzar un subagente y en cada prompt del usuario.
 
-No se conectaron porque eso cambia el comportamiento del agente en **todas** las
-sesiones futuras de este repositorio. Es una decisión de proyecto, no un
-detalle de instalación. Sin los hooks la skill funciona igual cuando la
-invocas (`/ponytail`), solo que no se queda pegada.
+Se conectaron a petición del dueño del repositorio. Es una decisión de proyecto
+con efecto real: **el agente trabaja en modo «senior perezoso» en todas las
+sesiones**, no solo cuando se invoca la skill. En la práctica significa preferir
+la librería estándar, reutilizar lo que ya existe en el código y no construir
+abstracciones que nadie pidió.
 
-Si la quieres siempre activa, añade esto a los `hooks` de
-`.claude/settings.json` (la plantilla de río arriba está en
-`.claude/ponytail/hooks.json.ejemplo`, con las rutas sin adaptar):
+Las tres entradas están en `.claude/settings.json`. La de `SessionStart` se
+añadió **junto a** la del script de arranque del repositorio, no en su lugar:
+ese array tiene dos entradas y ambas deben sobrevivir.
 
-```json
-"SessionStart": [
-  { "matcher": "startup|resume|clear|compact",
-    "hooks": [{ "type": "command", "timeout": 5,
-      "command": "node \"$CLAUDE_PROJECT_DIR/.claude/ponytail/ponytail-activate.js\"" }] }
-],
-"SubagentStart": [
-  { "hooks": [{ "type": "command", "timeout": 5,
-      "command": "node \"$CLAUDE_PROJECT_DIR/.claude/ponytail/ponytail-subagent.js\"" }] }
-],
-"UserPromptSubmit": [
-  { "hooks": [{ "type": "command", "timeout": 5,
-      "command": "node \"$CLAUDE_PROJECT_DIR/.claude/ponytail/ponytail-mode-tracker.js\"" }] }
-]
-```
+Medido antes de conectarlos: cada hook tarda entre 43 y 55 ms, con un timeout
+de 5 000 ms. El coste por turno es despreciable.
 
-Ojo: ya hay un `SessionStart` en `settings.json` (el script de arranque del
-repositorio). Añade el de ponytail a ese mismo array, no lo sustituyas.
+**Para apagarlo sin tocar la configuración**, basta decir «stop ponytail» o
+«modo normal» en el chat; y `/ponytail lite|full|ultra` cambia la intensidad.
+Para desactivarlo del todo, borra del `settings.json` las entradas de
+`SubagentStart`, `UserPromptSubmit` y la segunda de `SessionStart` — la que
+lleva `matcher`.
 
 ### Sobre las cifras que anuncia
 
