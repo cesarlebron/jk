@@ -10,6 +10,41 @@
             "timeout": 600
           }
         ]
+      },
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/ponytail/ponytail-activate.js\"",
+            "timeout": 5,
+            "statusMessage": "Cargando modo ponytail..."
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/ponytail/ponytail-subagent.js\"",
+            "timeout": 5,
+            "statusMessage": "Cargando modo ponytail..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/ponytail/ponytail-mode-tracker.js\"",
+            "timeout": 5,
+            "statusMessage": "Comprobando modo ponytail..."
+          }
+        ]
       }
     ]
   },
