@@ -5,3 +5,6 @@ package-lock.json
 # gstack per-repo runtime state (daemon pid/port, session tokens, browse logs)
 .gstack/
 .gstack-worktrees/
+
+# graphify: grafo generado desde el código, se reconstruye con `graphify update .`
+graphify-out/
