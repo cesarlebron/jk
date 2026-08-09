@@ -1,6 +1,6 @@
 # Skills
 
-Veintiuna skills de terceros — diseño de interfaz, publicación y una que obliga
+Veintitrés skills de terceros — diseño de interfaz, publicación y una que obliga
 a escribir menos código — más una propia que encadena diseño y publicación.
 
 Están **versionadas dentro del repo**, no instaladas en `~/.claude/skills`. El
@@ -41,6 +41,8 @@ que un cambio río arriba no altera el comportamiento sin que tú lo decidas.
 | `ponytail-debt` | Recoge los comentarios `ponytail:` en un registro de deuda | DietrichGebert/ponytail |
 | `ponytail-gain` | Marcador con el impacto medido del benchmark | DietrichGebert/ponytail |
 | `ponytail-help` | Referencia rápida de modos y comandos de ponytail | DietrichGebert/ponytail |
+| `ui-ux-pro-max` | Base de datos consultable: 192 paletas, 74 maridajes de fuentes, 98 pautas de UX | nextlevelbuilder/ui-ux-pro-max-skill |
+| `baoyu-design` | Genera maquetas, prototipos, wireframes y presentaciones en HTML autocontenido | JimLiu/baoyu-design |
 
 ### Versiones fijadas
 
@@ -54,6 +56,8 @@ que un cambio río arriba no altera el comportamiento sin que tú lo decidas.
 | [vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser) | `01c1147` | 2026-08-02 | Apache 2.0 |
 | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) v3.0.0 | `7c180d9` | 2026-07-24 | MIT (declarada en el README; el repo no trae archivo de licencia) |
 | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) v4.8.4 | `16f2980` | 2026-07-15 | MIT |
+| [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | `abb7f2f` | 2026-08-06 | MIT |
+| [JimLiu/baoyu-design](https://github.com/JimLiu/baoyu-design) | `026d4ea` | 2026-07-29 | MIT |
 
 Los textos de licencia están en `licencias/`, junto con el `NOTICE` que exige
 Apache 2.0. Ningún archivo fue modificado respecto al original.
@@ -89,6 +93,13 @@ duplicado comprimido de la propia carpeta, peso muerto dentro de un repositorio.
 
 **De ponytail se instalaron sus seis skills y sus hooks, pero los hooks no están
 conectados.** Ver su sección más abajo.
+
+**De ui-ux-pro-max se tomó solo la skill principal.** El repositorio trae siete.
+Se dejaron fuera `ui-styling` (5,8 MB de shadcn/ui, Radix y Tailwind, que no
+pinta nada en un proyecto sin framework ni dependencias), y `design`,
+`design-system` y `brand`, que se solapan con lo ya instalado y empeorarían la
+selección automática. `slides` y `banner-design` quedaron fuera por no
+pedirse; son pequeñas y se pueden añadir cuando hagan falta.
 
 ## ponytail: por qué necesita un `package.json` propio
 
@@ -206,6 +217,12 @@ Auditado antes de instalar:
 - **ponytail**: nada. Cero `fetch`, cero telemetría, cero analítica en sus
   hooks, scripts y MCP. Su `.env.example` pide una clave de Anthropic, pero es
   solo para correr su propio benchmark, no para usar la skill.
+- **ui-ux-pro-max**: la skill instalada no llama a nadie — su base es local, en
+  CSV. Los hosts que aparecen (`fonts.googleapis.com`, `images.pexels.com`) son
+  para el diseño que produce, no para ella; `api.github.com` vive en su CLI,
+  que no se instaló.
+- **baoyu-design**: nada. Las URLs que aparecen son espacios de nombres XML de
+  documentos ofimáticos, no llamadas.
 
 No se encontró exfiltración de código ni analítica de terceros en ninguna.
 
