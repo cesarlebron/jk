@@ -122,6 +122,8 @@ y eso es una moneda al aire. **No lo dejes al azar: enruta por tipo de tarea.**
 | Defectos concretos: espaciado, jerarquía, anti-patrones | `impeccable` | Es la única que **ejecuta código** y devuelve hallazgos verificables con archivo y línea, en vez de opiniones. `node .claude/skills/impeccable/scripts/detect.mjs --target <archivo>`. |
 | Movimiento, animación, transiciones, gestos | Las de Emil (`emil-design-eng`, `improve-animations`, `review-animations`, …) | No compiten con nadie: son las únicas de motion. |
 | Rediseñar **y** publicar en el mismo flujo | `disenar-y-publicar` | Encadena `frontend-design` → pruebas → `deploy-to-vercel` con la suite como puerta. |
+| Necesitas un **dato** concreto: una paleta, un maridaje de fuentes, un preset de motion | `ui-ux-pro-max` | No compite con las de arriba: no es una filosofía, es una **base de datos consultable** (192 paletas, 74 maridajes, 98 pautas de UX). Se consulta con `python .claude/skills/ui-ux-pro-max/scripts/search.py "<consulta>" --domain color`. Úsala *dentro* de las otras, no en lugar de ellas. |
+| Producir un **artefacto nuevo**: maqueta, prototipo, wireframe, presentación | `baoyu-design` | Tampoco compite: las demás moldean una interfaz que ya existe; esta genera piezas nuevas en HTML autocontenido. Para el cotizador, lo suyo son maquetas y presentaciones, no la app en sí. |
 
 `design-taste-frontend` queda como cuarta opción. Solapa con `frontend-design` y
 con `impeccable` sin superar a ninguna, y está pensada para landings y
